@@ -1,0 +1,359 @@
+#include "system_state.h"
+#include "Streaming.h"
+
+
+// Public methods
+// ------------------------------------------------------------------------------------------------
+
+SystemState::SystemState() {}
+
+
+void SystemState::initialize() 
+{
+    stepper_driver_.initialize();
+    stepper_driver_.set_movement_params_to_jog();
+    stepper_driver_.enable();
+
+    message_receiver_.reset();
+}
+
+
+void SystemState::process_messages()
+{
+    if (message_receiver_.available())
+    {
+        String message = message_receiver_.next();
+
+        StaticJsonBuffer<JsonMessageBufferSize> json_msg_buffer;
+        StaticJsonBuffer<JsonMessageBufferSize> json_rsp_buffer;
+
+        JsonObject &json_msg = json_msg_buffer.parse(message);
+        JsonObject &json_rsp = json_rsp_buffer.createObject();
+
+        if (json_msg.success())
+        {
+            handle_json_message(json_msg, json_rsp);
+        }
+        else
+        {
+            json_rsp["success"] = false;
+            json_rsp["message"] = "parse error";
+        }
+        json_rsp.printTo(Serial);
+        Serial << endl;
+    }
+}
+
+
+void SystemState::update_on_timer()
+{
+
+}
+
+
+void SystemState::update_on_serial_event()
+{
+    message_receiver_.read_data();
+
+}
+
+
+// Protected methods
+// ------------------------------------------------------------------------------------------------
+
+void SystemState::handle_json_message(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("command"))
+    {
+        handle_json_command(json_msg, json_rsp);
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "command missing";
+    }
+}
+
+
+void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    String command = String((const char*)(json_msg["command"]));
+
+    //Serial << "command = " << command << endl;
+
+    // Command switchyard
+    // --------------------------------------------------------------------------
+    if (command.equals("hard_stop"))
+    {
+        hard_stop_command(json_msg, json_rsp);
+    }
+    else if (command.equals("soft_stop"))
+    {
+        soft_stop_command(json_msg, json_rsp);
+    }
+    else if (command.equals("is_busy"))
+    {
+        is_busy_command(json_msg, json_rsp);
+    }
+    else if (command.equals("run"))
+    {
+        run_command(json_msg, json_rsp);
+    }
+    else if (command.equals("move_to"))
+    {
+        move_to_command(json_msg, json_rsp);
+    }
+    else if (command.equals("move_to_fullsteps"))
+    {
+        move_to_fullsteps_command(json_msg, json_rsp);
+    }
+    else if (command.equals("move_to_microsteps"))
+    {
+        move_to_microsteps_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_position"))
+    {
+        get_position_command(json_msg, json_rsp);
+    }
+    else if (command.equals("set_position"))
+    {
+        set_position_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_position_fullsteps"))
+    {
+        get_position_fullsteps_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_position_microsteps"))
+    {
+        get_position_microsteps_command(json_msg, json_rsp);
+    }
+    else if (command.equals("set_jog_mode"))
+    {
+        set_jog_mode_command(json_msg, json_rsp);
+    }
+    else if(command.equals("set_max_mode"))
+    {
+        set_max_mode_command(json_msg, json_rsp);
+    }
+    else if (command.equals("enable"))
+    {
+        enable_command(json_msg, json_rsp);
+    }
+    else if (command.equals("release"))
+    {
+        release_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_step_mode"))
+    {
+        get_step_mode_command(json_msg, json_rsp);
+    }
+    else if (command.equals("set_step_mode"))
+    {
+        set_step_mode_command(json_msg, json_rsp);
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = String("unknown command: ") + command;
+    }
+}
+
+
+void SystemState::hard_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    stepper_driver_.hard_stop();
+    json_rsp["success"] = true;
+}
+
+
+void SystemState::soft_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    stepper_driver_.soft_stop();
+    json_rsp["success"] = true;
+}
+
+void SystemState::is_busy_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    bool is_busy = stepper_driver_.is_busy();
+    json_rsp["success"] = true;
+    json_rsp["is_busy"] = is_busy;
+}
+
+
+void SystemState::run_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("velocity"))
+    {
+        float velocity = json_msg["velocity"];
+        stepper_driver_.run(velocity);
+        json_rsp["success"] = true;
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing velocity";
+    }
+}
+
+
+void SystemState::move_to_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("position"))
+    {
+        float position = json_msg["position"];
+        stepper_driver_.move_to(position);
+        json_rsp["success"] = true;
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing position";
+    }
+}
+
+
+void SystemState::move_to_fullsteps_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("position"))
+    {
+        float position = json_msg["position"];
+        stepper_driver_.move_to_fullsteps(position);
+        json_rsp["success"] = true;
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing position";
+    }
+}
+
+
+void SystemState::move_to_microsteps_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("position"))
+    {
+        long position = json_msg["position"];
+        stepper_driver_.move_to_microsteps(position);
+        json_rsp["success"] = true;
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing position";
+    }
+}
+
+
+void SystemState::get_position_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    float position = stepper_driver_.get_position();
+    json_rsp["success"] = true;
+    json_rsp["position"] = position;
+}
+
+
+void SystemState::set_position_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("position"))
+    {
+        float position = json_msg["position"];
+        stepper_driver_.set_position(position);
+        json_rsp["success"] = true;
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing position";
+    }
+}
+
+
+void SystemState::get_position_fullsteps_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    float position_fullsteps = stepper_driver_.get_position_fullsteps();
+    json_rsp["success"] = true;
+    json_rsp["position"] = position_fullsteps;
+}
+
+
+void SystemState::get_position_microsteps_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    long position_microsteps = stepper_driver_.get_position_microsteps();
+    json_rsp["success"] = true;
+    json_rsp["position"] = position_microsteps;
+}
+
+
+void SystemState::set_jog_mode_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    stepper_driver_.set_movement_params_to_jog();
+    json_rsp["success"] = true;
+}
+
+
+void SystemState::set_max_mode_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    stepper_driver_.set_movement_params_to_max();
+    json_rsp["success"] = true;
+}
+
+
+void SystemState::enable_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    stepper_driver_.enable();
+    json_rsp["success"] = true;
+}
+
+
+void SystemState::release_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    stepper_driver_.release();
+    json_rsp["success"] = true;
+}
+
+
+void SystemState::get_step_mode_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    String step_mode_string = stepper_driver_.get_step_mode_string();
+    json_rsp["success"] = true;
+    json_rsp["step_mode"] = step_mode_string;
+}
+
+void SystemState::set_step_mode_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("step_mode"))
+    {
+
+        String step_mode_string = json_msg["step_mode"];
+
+        // Get current enabled state
+        bool is_enabled = stepper_driver_.is_enabled();
+        stepper_driver_.release();  // Required
+
+        bool ok = stepper_driver_.set_step_mode(step_mode_string);
+
+        if (ok)
+        {
+            json_rsp["success"] = true;
+        }
+        else
+        {
+            json_rsp["success"] = false;
+            json_rsp["message"] = String("failed to set mode to ") + step_mode_string;
+        }
+
+        if (is_enabled)
+        {
+            stepper_driver_.enable();
+        }
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing step_mode";
+    }
+}
+
+
+
+
