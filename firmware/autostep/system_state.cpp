@@ -14,6 +14,8 @@ void SystemState::initialize()
     stepper_driver_.set_movement_params_to_jog();
     stepper_driver_.enable();
 
+    angle_sensor_.initialize(Angle_Sensor_Pin);
+
     message_receiver_.reset();
 }
 
@@ -24,8 +26,8 @@ void SystemState::process_messages()
     {
         String message = message_receiver_.next();
 
-        StaticJsonBuffer<JsonMessageBufferSize> json_msg_buffer;
-        StaticJsonBuffer<JsonMessageBufferSize> json_rsp_buffer;
+        StaticJsonBuffer<Json_Message_Buffer_Size> json_msg_buffer;
+        StaticJsonBuffer<Json_Message_Buffer_Size> json_rsp_buffer;
 
         JsonObject &json_msg = json_msg_buffer.parse(message);
         JsonObject &json_rsp = json_rsp_buffer.createObject();
@@ -126,6 +128,18 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
     else if (command.equals("get_position_microsteps"))
     {
         get_position_microsteps_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_position_sensor"))
+    {
+        get_position_sensor_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_voltage_sensor"))
+    {
+        get_voltage_sensor_command(json_msg, json_rsp);
+    }
+    else if (command.equals("autoset_position"))
+    {
+        autoset_position_command(json_msg, json_rsp);
     }
     else if (command.equals("set_jog_mode"))
     {
@@ -283,6 +297,28 @@ void SystemState::get_position_microsteps_command(JsonObject &json_msg, JsonObje
     json_rsp["position"] = position_microsteps;
 }
 
+
+void SystemState::get_position_sensor_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    float position = angle_sensor_.position();
+    json_rsp["success"] = true;
+    json_rsp["position"] = position;
+}
+
+
+void SystemState::get_voltage_sensor_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    float voltage = angle_sensor_.voltage();
+    json_rsp["success"] = true;
+    json_rsp["voltage"] = voltage;
+}
+
+
+void SystemState::autoset_position_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    stepper_driver_.set_position(angle_sensor_.position());
+    json_rsp["success"] = true;
+}
 
 void SystemState::set_jog_mode_command(JsonObject &json_msg, JsonObject &json_rsp)
 {

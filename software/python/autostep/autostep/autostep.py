@@ -166,6 +166,30 @@ class Autostep(serial.Serial):
         return rsp_dict['position']
 
 
+    def get_position_sensor(self):
+        """
+        Gets the current position of the motor as given by the EM3242 angle sensor.
+        """
+        cmd_dict = {'command': 'get_position_sensor'}
+        rsp_dict = self.send_cmd(cmd_dict)
+        return rsp_dict['position']
+
+
+    def get_voltage_sensor(self):
+        """
+        Gets the current voltage value fo the EM3242 angle sensor.
+        """
+        cmd_dict = {'command': 'get_voltage_sensor'}
+        rsp_dict = self.send_cmd(cmd_dict)
+        return rsp_dict['voltage']
+
+    def autoset_position(self):
+        """
+        Automatically sets the motor position from the EM3242 angle sensor.
+        """
+        cmd_dict = {'command': 'autoset_position'}
+        self.send_cmd(cmd_dict)
+
     def get_step_mode(self):
         """
         Get the current step_mode (e.g. STEP_FS, STEP_FS_2, ...)
@@ -215,23 +239,52 @@ class AutostepException(Exception):
 if __name__ == '__main__':
 
     import time
+    import numpy
+    import matplotlib.pyplot as plt
 
     port = '/dev/ttyACM0'
 
     stepper = Autostep(port)
     stepper.set_move_mode_to_max()
+    stepper.set_step_mode('STEP_FS_128') 
     stepper.enable()
-    stepper.set_position(0.0)
+    stepper.autoset_position()
+    stepper.move_to(0.0)
+
+    stepper.busy_wait()
+    time.sleep(1.0)
+
+    angle_array = numpy.linspace(5,355,40)
+
+    sensor_angle_list = []
+    sensor_volt_list = []
+
+    for i, angle in enumerate(angle_array):
+        stepper.move_to(angle)
+        stepper.busy_wait()
+        sensor_angle = stepper.get_position_sensor()
+        sensor_volt = stepper.get_voltage_sensor()
+        sensor_angle_list.append(sensor_angle)
+        sensor_volt_list.append(sensor_volt)
+        print('{0}: {1:1.2f} {2:1.2f} {3:1.3f}'.format(i, angle, sensor_angle,sensor_volt))
 
 
-    for mode in Autostep.StepModeList:
+    sensor_angle_array = numpy.array(sensor_angle_list)
 
-        print('setting mode {0}'.format(mode))
-        stepper.set_step_mode(mode)
+    fit = numpy.polyfit(angle_array, sensor_angle_array,1)
 
-        mode_tmp = stepper.get_step_mode()
-        print('reading mode {0}'.format(mode_tmp))
-        print()
+    fit_angle_array = numpy.linspace(angle_array.min(), angle_array.max(), 500)
+    fit_sensor_angle_array = numpy.polyval(fit,fit_angle_array)
+    
+    plt.plot(angle_array, sensor_angle_list, 'o')
+    plt.plot(fit_angle_array, fit_sensor_angle_array, 'r')
+    plt.grid('on')
+    plt.xlabel('motor position (deg)')
+    plt.ylabel('em3242 sensor (deg)')
+    plt.show()
+
+
+
 
 
 

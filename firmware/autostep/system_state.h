@@ -3,6 +3,7 @@
 
 #include "stepper_driver.h"
 #include "message_receiver.h"
+#include "em3242_angle_sensor.h"
 #include "ArduinoJson.h"
 
 
@@ -21,6 +22,7 @@ class SystemState
     protected:
 
         StepperDriver stepper_driver_;
+        EM3242_AngleSensor angle_sensor_;
         MessageReceiver message_receiver_;
 
         // Message handlers
@@ -42,6 +44,10 @@ class SystemState
 
         void get_position_fullsteps_command(JsonObject &json_msg, JsonObject &json_rsp);
         void get_position_microsteps_command(JsonObject &json_msg, JsonObject &json_rsp);
+
+        void get_position_sensor_command(JsonObject &json_msg, JsonObject &json_rsp);
+        void get_voltage_sensor_command(JsonObject &json_msg, JsonObject &json_rsp);
+        void autoset_position_command(JsonObject &json_msg, JsonObject &json_rsp);
 
         void set_jog_mode_command(JsonObject &json_msg, JsonObject &json_rsp);
         void set_max_mode_command(JsonObject &json_msg, JsonObject &json_rsp);

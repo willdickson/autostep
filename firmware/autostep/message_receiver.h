@@ -21,7 +21,7 @@ class MessageReceiver
 
     protected:
 
-        CircularBuffer<char,SerialBufferSize> serial_buffer_;
+        CircularBuffer<char,Serial_Buffer_Size> serial_buffer_;
         bool overflow_ = false;
         uint32_t message_cnt_ = 0;
         uint32_t total_message_cnt_ = 0;
