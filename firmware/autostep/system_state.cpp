@@ -13,10 +13,22 @@ void SystemState::initialize()
     stepper_driver_.initialize();
     stepper_driver_.set_movement_params_to_jog();
     stepper_driver_.enable();
-
     angle_sensor_.initialize(Angle_Sensor_Pin);
-
     message_receiver_.reset();
+
+    curr_trajectory_ptr_ = nullptr;
+    timer_callback_ = nullptr;
+
+    t_sec_ = 0.0;
+}
+
+
+void SystemState::set_timer_callback(void(*callback)())
+{
+    if (callback != nullptr)
+    {
+        timer_callback_ = callback; 
+    }
 }
 
 
@@ -97,10 +109,6 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
     {
         is_busy_command(json_msg, json_rsp);
     }
-    else if (command.equals("run"))
-    {
-        run_command(json_msg, json_rsp);
-    }
     else if (command.equals("move_to"))
     {
         move_to_command(json_msg, json_rsp);
@@ -112,6 +120,14 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
     else if (command.equals("move_to_microsteps"))
     {
         move_to_microsteps_command(json_msg, json_rsp);
+    }
+    else if (command.equals("run"))
+    {
+        run_command(json_msg, json_rsp);
+    }
+    else if (command.equals("sinusoid"))
+    {
+        sinusoid_command(json_msg, json_rsp);
     }
     else if (command.equals("get_position"))
     {
@@ -194,20 +210,6 @@ void SystemState::is_busy_command(JsonObject &json_msg, JsonObject &json_rsp)
 }
 
 
-void SystemState::run_command(JsonObject &json_msg, JsonObject &json_rsp)
-{
-    if (json_msg.containsKey("velocity"))
-    {
-        float velocity = json_msg["velocity"];
-        stepper_driver_.run(velocity);
-        json_rsp["success"] = true;
-    }
-    else
-    {
-        json_rsp["success"] = false;
-        json_rsp["message"] = "missing velocity";
-    }
-}
 
 
 void SystemState::move_to_command(JsonObject &json_msg, JsonObject &json_rsp)
@@ -255,6 +257,94 @@ void SystemState::move_to_microsteps_command(JsonObject &json_msg, JsonObject &j
         json_rsp["success"] = false;
         json_rsp["message"] = "missing position";
     }
+}
+
+void SystemState::run_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("velocity"))
+    {
+        float velocity = json_msg["velocity"];
+        stepper_driver_.run(velocity);
+        json_rsp["success"] = true;
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing velocity";
+    }
+}
+
+
+void SystemState::sinusoid_command(JsonObject &json_msg, JsonObject &json_rsp)
+{ 
+
+    if (json_msg.containsKey("amplitude"))
+    {
+        sin_trajectory_.set_amplitude(json_msg["amplitude"]);
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing amplitude";
+        return;
+    }
+
+
+    if (json_msg.containsKey("period"))
+    {
+        sin_trajectory_.set_period(json_msg["period"]);
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing period";
+        return;
+    }
+
+   
+    if (json_msg.containsKey("offset"))
+    {
+        sin_trajectory_.set_offset(json_msg["offset"]);
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing offset";
+        return;
+    }
+
+    if (json_msg.containsKey("phase"))
+    {
+        sin_trajectory_.set_phase(json_msg["phase"]);
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing phase";
+        return;
+    }
+
+    if (json_msg.containsKey("num_cycle"))
+    {
+        float num_cycle = json_msg["num_cycle"];
+        sin_trajectory_.set_num_cycle(uint32_t(num_cycle));
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing num_cycles";
+        return;
+    }
+
+
+    curr_trajectory_ptr_ = &sin_trajectory_;
+
+    json_rsp["success"] = true;
+    json_rsp["amplitude"] = sin_trajectory_.amplitude();
+    json_rsp["period"] = sin_trajectory_.period();
+    json_rsp["phase"] = sin_trajectory_.phase();
+    json_rsp["offset"] = sin_trajectory_.offset();
+    json_rsp["num_cycle"] = sin_trajectory_.num_cycle();
 }
 
 

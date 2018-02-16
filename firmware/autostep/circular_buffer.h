@@ -1,5 +1,5 @@
-#ifndef PS_CIRCULAR_BUFFER_H
-#define PS_CIRCULAR_BUFFER_H
+#ifndef CIRCULAR_BUFFER_H
+#define CIRCULAR_BUFFER_H
 
 #include <Arduino.h>
 #include "Array.h"

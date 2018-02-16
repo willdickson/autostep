@@ -9,6 +9,12 @@ class Trajectory
         Trajectory();
         virtual float position(float t);
         virtual float velocity(float t);
+
+        bool is_running();
+
+    protected:
+
+        bool running_;
 };
 
 

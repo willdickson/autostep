@@ -13,11 +13,16 @@ void setup()
 }
 
 
-
 void loop()
 {
     system_state.process_messages();
+    system_state.set_timer_callback(timerEvent);
+}
 
+
+void timerEvent()
+{
+    system_state.update_on_timer();
 }
 
 

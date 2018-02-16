@@ -60,6 +60,18 @@ class Autostep(serial.Serial):
         self.send_cmd(cmd_dict)
 
 
+    def sinusoid(self, param): 
+        """
+        Run sinusoidal trajectory with given amplitude, period, phase, offest and number of cycles.
+        """
+        cmd_dict = {'command': 'sinusoid'};
+        sinusoid_keys = ['amplitude', 'period', 'phase', 'offset', 'num_cycle']
+        for key in sinusoid_keys:
+            cmd_dict[key] = param[key]
+        rsp_dict = self.send_cmd(cmd_dict)
+        print(rsp_dict)
+
+
     def move_to(self,position):
         """
         Move motor to specified position (deg). Motor will run until it reaches this position.
@@ -248,40 +260,51 @@ if __name__ == '__main__':
     stepper.set_move_mode_to_max()
     stepper.set_step_mode('STEP_FS_128') 
     stepper.enable()
-    stepper.autoset_position()
-    stepper.move_to(0.0)
+    #stepper.autoset_position()
+    #stepper.move_to(0.0)
+    #stepper.busy_wait()
+    #time.sleep(1.0)
 
-    stepper.busy_wait()
-    time.sleep(1.0)
+    param = { 
+            'amplitude': 10.0,
+            'period':  1.0,
+            'phase':  0.0,
+            'offset': 25.1,
+            'num_cycle': 2
+            }
+    stepper.sinusoid(param)
 
-    angle_array = numpy.linspace(5,355,40)
-
-    sensor_angle_list = []
-    sensor_volt_list = []
-
-    for i, angle in enumerate(angle_array):
-        stepper.move_to(angle)
-        stepper.busy_wait()
-        sensor_angle = stepper.get_position_sensor()
-        sensor_volt = stepper.get_voltage_sensor()
-        sensor_angle_list.append(sensor_angle)
-        sensor_volt_list.append(sensor_volt)
-        print('{0}: {1:1.2f} {2:1.2f} {3:1.3f}'.format(i, angle, sensor_angle,sensor_volt))
-
-
-    sensor_angle_array = numpy.array(sensor_angle_list)
-
-    fit = numpy.polyfit(angle_array, sensor_angle_array,1)
-
-    fit_angle_array = numpy.linspace(angle_array.min(), angle_array.max(), 500)
-    fit_sensor_angle_array = numpy.polyval(fit,fit_angle_array)
     
-    plt.plot(angle_array, sensor_angle_list, 'o')
-    plt.plot(fit_angle_array, fit_sensor_angle_array, 'r')
-    plt.grid('on')
-    plt.xlabel('motor position (deg)')
-    plt.ylabel('em3242 sensor (deg)')
-    plt.show()
+
+    #num =  50 
+    #angle_array = numpy.concatenate((numpy.linspace(5,355,num), numpy.linspace(355,5,num)))
+
+    #sensor_angle_list = []
+    #sensor_volt_list = []
+
+    #for i, angle in enumerate(angle_array):
+    #    stepper.move_to(angle)
+    #    stepper.busy_wait()
+    #    sensor_angle = stepper.get_position_sensor()
+    #    sensor_volt = stepper.get_voltage_sensor()
+    #    sensor_angle_list.append(sensor_angle)
+    #    sensor_volt_list.append(sensor_volt)
+    #    print('{0}: {1:1.2f} {2:1.2f} {3:1.3f}'.format(i, angle, sensor_angle,sensor_volt))
+
+
+    #stepper.move_to(0.0)
+    #sensor_angle_array = numpy.array(sensor_angle_list)
+
+    #fit = numpy.polyfit(angle_array, sensor_angle_array,1)
+    #fit_angle_array = numpy.linspace(angle_array.min(), angle_array.max(), 500)
+    #fit_sensor_angle_array = numpy.polyval(fit,fit_angle_array)
+    #
+    #plt.plot(angle_array, sensor_angle_list, 'o')
+    #plt.plot(fit_angle_array, fit_sensor_angle_array, 'r')
+    #plt.grid('on')
+    #plt.xlabel('motor position (deg)')
+    #plt.ylabel('em3242 sensor (deg)')
+    #plt.show()
 
 
 
