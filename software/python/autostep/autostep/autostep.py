@@ -257,22 +257,22 @@ if __name__ == '__main__':
     port = '/dev/ttyACM0'
 
     stepper = Autostep(port)
-    stepper.set_move_mode_to_max()
+    stepper.set_move_mode_to_jog()
     stepper.set_step_mode('STEP_FS_128') 
     stepper.enable()
-    #stepper.autoset_position()
-    #stepper.move_to(0.0)
-    #stepper.busy_wait()
-    #time.sleep(1.0)
+    stepper.autoset_position()
+    stepper.move_to(0.0)
+    time.sleep(1.0)
 
     param = { 
-            'amplitude': 10.0,
-            'period':  1.0,
+            'amplitude': 90.0,
+            'period':  4.0,
             'phase':  0.0,
-            'offset': 25.1,
+            'offset': .0, 
             'num_cycle': 2
             }
     stepper.sinusoid(param)
+    stepper.busy_wait()
 
     
 

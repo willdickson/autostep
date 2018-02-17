@@ -4,12 +4,13 @@
 #include "utility.h"
 
 
-SinTrajectory::SinTrajectory(float amplitude, float period, float phase, float offset)
+SinTrajectory::SinTrajectory(float amplitude, float period, float phase, float offset, uint32_t num_cycle)
 {
     amplitude_ = amplitude;
     period_ = period;
     phase_ = deg_to_rad(phase);
     offset_ = offset;
+    num_cycle_ = num_cycle;
 }
 
 
@@ -22,6 +23,19 @@ float SinTrajectory::position(float t)
 float SinTrajectory::velocity(float t)
 {
     return (2.0*M_PI/period_)*amplitude_*cos((2.0*M_PI/period_)*t + phase_);
+}
+
+
+bool SinTrajectory::is_done(float t) 
+{
+    if (t >= period_*num_cycle_)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 

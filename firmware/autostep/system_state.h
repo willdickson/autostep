@@ -22,6 +22,7 @@ class SystemState
         void set_timer_callback(void(*func)());
         void process_messages();
 
+        void update_trajectory();
         void update_on_timer();
         void update_on_serial_event();
 
@@ -34,14 +35,17 @@ class SystemState
 
         VelocityController velocity_controller_;
 
-        IntervalTimer timer_;
+        volatile bool timer_flag_;
+        IntervalTimer interval_timer_;
+
         static void dummy_callback_() {};
         void (*timer_callback_)() = dummy_callback_;
-        double t_sec_;
 
-        Trajectory *curr_trajectory_ptr_;
+        float time_sec_;
+
+        Trajectory *trajectory_ptr_;
         SinTrajectory sin_trajectory_;
-
+        void start_trajectory();
 
         // Message handlers
         void handle_json_message(JsonObject &json_msg, JsonObject &json_rsp);

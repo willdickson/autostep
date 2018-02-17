@@ -7,10 +7,11 @@ class SinTrajectory : public Trajectory
 {
     public:
         
-        SinTrajectory(float amplitude=1.0, float period=1.0, float phase=0.0, float offset=0.0);
+        SinTrajectory(float amplitude=1.0, float period=1.0, float phase=0.0, float offset=0.0, uint32_t num_cycle=1);
 
         virtual float position(float t) override;
         virtual float velocity(float t) override;
+        virtual bool is_done(float t) override;
 
         void set_amplitude(float amplitude);
         void set_period(float period);

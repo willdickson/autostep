@@ -40,7 +40,7 @@ UpdateInfo VelocityController::update(float t, StepperDriver &stepper, Trajector
     float error = setp_position - curr_position;
     float next_velocity = position_gain_*(setp_position - curr_position) + velocity_ffwd_*setp_velocity;
     stepper.run(next_velocity);
-    UpdateInfo info = {error, curr_position, setp_position};
+    UpdateInfo info = {error, curr_position, setp_position, trajectory.is_done(t)};
     return info;
 }
 

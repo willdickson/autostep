@@ -6,15 +6,21 @@ class Trajectory
 {
     public:
 
+        enum Status {Setup,Running,Done};
+
         Trajectory();
         virtual float position(float t);
         virtual float velocity(float t);
+        virtual bool is_done(float t);
 
-        bool is_running();
+        Trajectory::Status status();
+        void set_status(Trajectory::Status value);
 
     protected:
 
-        bool running_;
+        Status status_;
+
+
 };
 
 

@@ -8,6 +8,7 @@ struct UpdateInfo
     float error;
     float curr_position; 
     float setp_position; 
+    bool done;
 };
 
 class VelocityController
@@ -16,7 +17,6 @@ class VelocityController
 
         float DefaultPositionGain = 200.0;
         float DefaultVelocityFFwd = 1.0;
-
 
         VelocityController();
 

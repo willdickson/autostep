@@ -1,4 +1,5 @@
 #include "system_state.h"
+#include "util/atomic.h"
 #include "Streaming.h"
 
 
@@ -16,10 +17,14 @@ void SystemState::initialize()
     angle_sensor_.initialize(Angle_Sensor_Pin);
     message_receiver_.reset();
 
-    curr_trajectory_ptr_ = nullptr;
+    velocity_controller_.set_position_gain(Position_Gain);
+    velocity_controller_.set_velocity_ffwd(Velocity_FFwd);
+
+    timer_flag_ = false;
+    trajectory_ptr_ = nullptr;
     timer_callback_ = nullptr;
 
-    t_sec_ = 0.0;
+    time_sec_ = 0.0;
 }
 
 
@@ -60,20 +65,83 @@ void SystemState::process_messages()
 
 
 void SystemState::update_on_timer()
-{
+{ 
+    timer_flag_ = true;
+}
 
+void SystemState::update_trajectory()
+{
+    bool timer_flag_tmp;
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        timer_flag_tmp = timer_flag_;
+        timer_flag_ = false;
+    }
+
+    if (timer_flag_tmp)
+    {
+        if ((trajectory_ptr_ != nullptr))
+        {
+
+            Trajectory::Status status = trajectory_ptr_ -> status();
+            time_sec_ += 1.0e-6*float(Timer_Period);
+
+            switch (status)
+            {
+                case Trajectory::Setup:
+                    if (!stepper_driver_.is_busy())
+                    {
+                        time_sec_ = 0.0;
+                        stepper_driver_.set_movement_params_to_max();
+                        trajectory_ptr_ -> set_status(Trajectory::Running);
+                    }
+                    break;
+
+                case Trajectory::Running:
+                    {
+                        UpdateInfo info = velocity_controller_.update(time_sec_,stepper_driver_,*trajectory_ptr_);
+                        if (info.done)
+                        {
+                            interval_timer_.end();
+                            stepper_driver_.set_movement_params_to_jog();
+                            stepper_driver_.soft_stop();
+                            trajectory_ptr_ -> set_status(Trajectory::Done);
+                        }
+                    }
+                    break;
+
+                case Trajectory::Done:
+                    interval_timer_.end();
+                    break;
+
+                default:
+                    interval_timer_.end();
+                    break;
+            }
+
+        }
+    }
 }
 
 
 void SystemState::update_on_serial_event()
 {
     message_receiver_.read_data();
-
 }
 
 
 // Protected methods
 // ------------------------------------------------------------------------------------------------
+
+void SystemState::start_trajectory()
+{
+    time_sec_ = 0.0;
+    trajectory_ptr_ -> set_status(Trajectory::Setup);
+    stepper_driver_.set_movement_params_to_jog();
+    stepper_driver_.move_to(trajectory_ptr_ -> position(time_sec_));
+    interval_timer_.begin(timer_callback_, Timer_Period);
+}
 
 void SystemState::handle_json_message(JsonObject &json_msg, JsonObject &json_rsp)
 {
@@ -204,7 +272,8 @@ void SystemState::soft_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
 
 void SystemState::is_busy_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
-    bool is_busy = stepper_driver_.is_busy();
+    
+    bool is_busy = stepper_driver_.is_busy() || ((trajectory_ptr_ -> status()) != Trajectory::Done);
     json_rsp["success"] = true;
     json_rsp["is_busy"] = is_busy;
 }
@@ -337,7 +406,7 @@ void SystemState::sinusoid_command(JsonObject &json_msg, JsonObject &json_rsp)
     }
 
 
-    curr_trajectory_ptr_ = &sin_trajectory_;
+    trajectory_ptr_ = &sin_trajectory_;
 
     json_rsp["success"] = true;
     json_rsp["amplitude"] = sin_trajectory_.amplitude();
@@ -345,6 +414,9 @@ void SystemState::sinusoid_command(JsonObject &json_msg, JsonObject &json_rsp)
     json_rsp["phase"] = sin_trajectory_.phase();
     json_rsp["offset"] = sin_trajectory_.offset();
     json_rsp["num_cycle"] = sin_trajectory_.num_cycle();
+
+    start_trajectory();
+
 }
 
 

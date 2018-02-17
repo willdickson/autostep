@@ -10,13 +10,14 @@ void setup()
 {
     Serial.begin(Baudrate);
     system_state.initialize();
+    system_state.set_timer_callback(timerEvent);
 }
 
 
 void loop()
 {
+    system_state.update_trajectory();
     system_state.process_messages();
-    system_state.set_timer_callback(timerEvent);
 }
 
 
