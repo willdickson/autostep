@@ -69,8 +69,18 @@ class Autostep(serial.Serial):
         for key in sinusoid_keys:
             cmd_dict[key] = param[key]
         rsp_dict = self.send_cmd(cmd_dict)
-        print(rsp_dict)
 
+        data_list = []
+        while True:
+            dat_json = self.readline()
+            dat_json = dat_json.strip()
+            dat_dict = json.loads(dat_json.decode())
+            if dat_dict:
+                data_list.append([dat_dict['t'], dat_dict['p'], dat_dict['s'], dat_dict['m']])
+            else:
+                break
+        return data_list
+        
 
     def move_to(self,position):
         """
@@ -257,23 +267,35 @@ if __name__ == '__main__':
     port = '/dev/ttyACM0'
 
     stepper = Autostep(port)
-    stepper.set_move_mode_to_jog()
     stepper.set_step_mode('STEP_FS_128') 
+    stepper.set_move_mode_to_jog()
+
     stepper.enable()
     stepper.autoset_position()
-    stepper.move_to(0.0)
-    time.sleep(1.0)
+
+    #stepper.move_to(0.0)
+    #time.sleep(5.0)
 
     param = { 
             'amplitude': 90.0,
-            'period':  4.0,
-            'phase':  0.0,
-            'offset': .0, 
-            'num_cycle': 2
+            'period':  4,
+            'phase':  90.0,
+            'offset': 100.0, 
+            'num_cycle': 2 
             }
-    stepper.sinusoid(param)
+    data = stepper.sinusoid(param)
     stepper.busy_wait()
 
+    data = numpy.array(data)
+    tsec = data[:,0]
+    angl = data[:,1]
+    setp = data[:,2]
+    sens = data[:,3]
+
+    plt.plot(tsec,angl,'b')
+    plt.plot(tsec,setp,'r')
+    plt.plot(tsec,sens,'g')
+    plt.show()
     
 
     #num =  50 
