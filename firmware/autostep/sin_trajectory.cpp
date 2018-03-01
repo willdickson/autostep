@@ -53,7 +53,7 @@ void SinTrajectory::set_period(float period)
 
 void SinTrajectory::set_phase(float phase)
 {
-    phase_ = phase;
+    phase_ = deg_to_rad(phase);
 }
 
 

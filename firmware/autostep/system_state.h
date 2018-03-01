@@ -43,6 +43,9 @@ class SystemState
 
         float time_sec_;
 
+        float data_send_dt_;
+        float time_last_send_sec_;
+
         Trajectory *trajectory_ptr_;
         SinTrajectory sin_trajectory_;
         void start_trajectory();

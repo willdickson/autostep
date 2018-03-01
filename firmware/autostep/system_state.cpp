@@ -25,6 +25,13 @@ void SystemState::initialize()
     timer_callback_ = nullptr;
 
     time_sec_ = 0.0;
+    data_send_dt_ = 0.01;
+
+    // DEBUG
+    // --------------------------------------------------
+    pinMode(2,OUTPUT);
+    digitalWrite(2,LOW);
+    // --------------------------------------------------
 }
 
 
@@ -71,6 +78,8 @@ void SystemState::update_on_timer()
 
 void SystemState::update_trajectory()
 {
+    static bool dio_state = false;
+
     bool timer_flag_tmp;
 
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
@@ -79,8 +88,23 @@ void SystemState::update_trajectory()
         timer_flag_ = false;
     }
 
+
     if (timer_flag_tmp)
     {
+        // DEBUG
+        // --------------------------------------------------
+        if (dio_state)
+        {
+            dio_state = false;
+            digitalWrite(2,LOW);
+        }
+        else
+        {
+            dio_state = true;
+            digitalWrite(2,HIGH);
+        }
+        // --------------------------------------------------
+
         if ((trajectory_ptr_ != nullptr))
         {
 
@@ -93,6 +117,7 @@ void SystemState::update_trajectory()
                     if (!stepper_driver_.is_busy())
                     {
                         time_sec_ = 0.0;
+                        time_last_send_sec_ = 0.0;
                         stepper_driver_.set_movement_params_to_max();
                         trajectory_ptr_ -> set_status(Trajectory::Running);
                     }
@@ -101,12 +126,31 @@ void SystemState::update_trajectory()
                 case Trajectory::Running:
                     {
                         UpdateInfo info = velocity_controller_.update(time_sec_,stepper_driver_,*trajectory_ptr_);
+
+                        if ((time_sec_ - time_last_send_sec_) > data_send_dt_)
+                        {
+                            StaticJsonBuffer<Json_Data_Buffer_Size> json_dat_buffer;
+                            JsonObject &json_dat = json_dat_buffer.createObject();
+                            json_dat["t"] = time_sec_;
+                            json_dat["p"] = info.curr_position;
+                            json_dat["s"] = info.setp_position;
+                            json_dat["m"] = angle_sensor_.position();
+                            json_dat.printTo(Serial);
+                            Serial << endl;
+                            time_last_send_sec_ = time_sec_;
+                        }
+                        
                         if (info.done)
                         {
                             interval_timer_.end();
                             stepper_driver_.set_movement_params_to_jog();
                             stepper_driver_.soft_stop();
                             trajectory_ptr_ -> set_status(Trajectory::Done);
+
+                            StaticJsonBuffer<Json_Data_Buffer_Size> json_dat_buffer;
+                            JsonObject &json_dat = json_dat_buffer.createObject();
+                            json_dat.printTo(Serial);
+                            Serial << endl;
                         }
                     }
                     break;
