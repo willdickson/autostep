@@ -2,7 +2,9 @@ from __future__ import print_function
 import serial
 import atexit
 import json
-
+import time
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Autostep(serial.Serial):
@@ -11,6 +13,7 @@ class Autostep(serial.Serial):
     BusyWaitSleepDt = 0.05
     DefaultTimeout = 10.0
     DefaultResetSleep = 0.0
+    AutosetPositionStartAngle = 5.0
 
     StepModeList = [
             'STEP_FS', 
@@ -32,6 +35,7 @@ class Autostep(serial.Serial):
         atexit.register(self.atexit_cleanup)
         while self.inWaiting() > 0:
             val = self.read()
+        self.sensor_cal = None
 
 
     def enable(self):
@@ -132,6 +136,9 @@ class Autostep(serial.Serial):
 
 
     def busy_wait(self):
+        """
+        Wait unil current motion command is finshed.
+        """
         while self.is_busy():
             time.sleep(self.BusyWaitSleepDt) 
 
@@ -205,12 +212,25 @@ class Autostep(serial.Serial):
         rsp_dict = self.send_cmd(cmd_dict)
         return rsp_dict['voltage']
 
+
     def autoset_position(self):
         """
         Automatically sets the motor position from the EM3242 angle sensor.
         """
         cmd_dict = {'command': 'autoset_position'}
         self.send_cmd(cmd_dict)
+
+
+    def run_autoset_procedure(self):
+        """
+        Runs autoset procedure to ensure consistance between autoset position and
+        saved sensor calibrations.
+        """
+        self.autoset_position()
+        self.move_to(self.AutosetPositionStartAngle)
+        self.busy_wait()
+        self.autoset_position()
+
 
     def get_step_mode(self):
         """
@@ -250,6 +270,93 @@ class Autostep(serial.Serial):
         return msg_dict
 
 
+    def have_calibraiton(self):
+        """
+        True/False based on existance of sensor calibration
+        """
+        if self.sensor_cal is None:
+            return False
+        else:
+            return True
+
+
+    def calibrate_sensor(self,num_pts=10,margin=1.5,plot_data=True,print_info=True):
+        """
+        Generate calibration for EM3242 sensor.
+        """
+
+        if print_info:
+            print()
+            print("Calibrating angle sensor, num_pts = {}".format(num_pts))
+            print()
+
+        self.sensor_cal = None
+
+        self.enable()
+        self.run_autoset_procedure()
+        
+        # Loop over calibration angles and get corresponding sensor angle
+        calib_angle_array_tmp = np.linspace(margin,360.0-margin,num_pts)
+        sense_angle_array_tmp = np.zeros(calib_angle_array_tmp.shape)
+
+        self.set_move_mode_to_jog()
+        self.move_to(calib_angle_array_tmp[0])
+        self.busy_wait()
+
+        self.set_move_mode_to_max()
+
+        for i, calib_angle in enumerate(calib_angle_array_tmp):
+            self.move_to(calib_angle)
+            self.busy_wait()
+            sense_angle = self.get_position_sensor()
+            sense_angle_array_tmp[i] = sense_angle
+            if print_info:
+                calib_str = '{:3.3f}'.format(calib_angle)
+                sense_str = '{:3.3f}'.format(sense_angle)
+                info_dict = {
+                        'count': '({}/{})'.format(i,num_pts),
+                        'calib': '{:<6} {:>8}'.format('calib', calib_str),
+                        'sense': '{:<6} {:>8}'.format('sense', sense_str),
+                        }
+                print('{count:<10s} {calib:>10s}   {sense:>10s}'.format(**info_dict))
+
+        self.set_move_mode_to_jog()
+
+        # Add back end points and pack in to nx2 array
+        calib_angle_array = np.zeros((num_pts+2,))
+        calib_angle_array[1:num_pts+1] = calib_angle_array_tmp
+        calib_angle_array[num_pts+1] = 360.0
+
+        sense_angle_array = np.zeros((num_pts+2,))
+        sense_angle_array[1:num_pts+1] = sense_angle_array_tmp
+        sense_angle_array[num_pts+1] = 360.0
+
+        self.sensor_cal = np.array([sense_angle_array,calib_angle_array]).transpose() 
+
+        if plot_data:
+            plt.plot(calib_angle_array, sense_angle_array,'o')
+            plt.xlabel('calibration angle (deg)')
+            plt.ylabel('sensor angle (deg)')
+            plt.grid('on')
+            plt.show()
+
+
+    def apply_sensor_calibration(self,value):
+        return np.interp(value, self.sensor_cal[:,0], self.sensor_cal[:,1])
+
+
+    def save_sensor_calibration(self,filename):
+        np.savetxt(filename, self.sensor_cal)
+
+
+    def load_sensor_calibration(self,filename):
+        self.sensor_cal = np.loadtxt(filename)
+
+
+    def clear_sensor_calibration(self):
+        self.sensor_cal = None
+
+
     def atexit_cleanup(self):
         pass
 
@@ -260,73 +367,69 @@ class AutostepException(Exception):
 # ---------------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    import time
-    import numpy
-    import matplotlib.pyplot as plt
 
     port = '/dev/ttyACM0'
+    cal_filename = 'sensor.cal'
 
     stepper = Autostep(port)
     stepper.set_step_mode('STEP_FS_128') 
     stepper.set_move_mode_to_jog()
-
     stepper.enable()
-    stepper.autoset_position()
 
-    #stepper.move_to(0.0)
-    #time.sleep(5.0)
 
-    param = { 
-            'amplitude': 90.0,
-            'period':  4,
-            'phase':  90.0,
-            'offset': 100.0, 
-            'num_cycle': 2 
-            }
-    data = stepper.sinusoid(param)
-    stepper.busy_wait()
+    if False:
 
-    data = numpy.array(data)
-    tsec = data[:,0]
-    angl = data[:,1]
-    setp = data[:,2]
-    sens = data[:,3]
+        """
+        Generate sensor calibration
 
-    plt.plot(tsec,angl,'b')
-    plt.plot(tsec,setp,'r')
-    plt.plot(tsec,sens,'g')
-    plt.show()
+        """
+
+        stepper.calibrate_sensor(50)
+        stepper.save_sensor_calibration(cal_filename)
+
+
+    if True:
+
+        """
+        Sinusoid test
+
+        """
+
+        stepper.run_autoset_procedure()
+        stepper.load_sensor_calibration(cal_filename)
+        stepper.set_move_mode_to_max()
+
+        param = { 
+                'amplitude': 30,
+                'period':  1,
+                'phase':  90.0,
+                'offset': 100.0, 
+                'num_cycle': 2 
+                }
+        data = stepper.sinusoid(param)
+        stepper.busy_wait()
+
+        data = np.array(data)
+        tsec = data[:,0]
+        angl = data[:,1]
+        setp = data[:,2]
+        sens = data[:,3]
+
+        sens = stepper.apply_sensor_calibration(sens)
+
+        angl_line, = plt.plot(tsec,angl,'b')
+        setp_line, = plt.plot(tsec,setp,'r')
+        sens_line, = plt.plot(tsec,sens,'g')
+        plt.xlabel('time (s)')
+        plt.ylabel('angle (deg)')
+        plt.grid('on')
+        line_list = [angl_line, setp_line, sens_line]
+        label_list = 'driver', 'setpt', 'sensor'
+        plt.figlegend(line_list, label_list, 'upper right')
+        plt.show()
     
 
-    #num =  50 
-    #angle_array = numpy.concatenate((numpy.linspace(5,355,num), numpy.linspace(355,5,num)))
 
-    #sensor_angle_list = []
-    #sensor_volt_list = []
-
-    #for i, angle in enumerate(angle_array):
-    #    stepper.move_to(angle)
-    #    stepper.busy_wait()
-    #    sensor_angle = stepper.get_position_sensor()
-    #    sensor_volt = stepper.get_voltage_sensor()
-    #    sensor_angle_list.append(sensor_angle)
-    #    sensor_volt_list.append(sensor_volt)
-    #    print('{0}: {1:1.2f} {2:1.2f} {3:1.3f}'.format(i, angle, sensor_angle,sensor_volt))
-
-
-    #stepper.move_to(0.0)
-    #sensor_angle_array = numpy.array(sensor_angle_list)
-
-    #fit = numpy.polyfit(angle_array, sensor_angle_array,1)
-    #fit_angle_array = numpy.linspace(angle_array.min(), angle_array.max(), 500)
-    #fit_sensor_angle_array = numpy.polyval(fit,fit_angle_array)
-    #
-    #plt.plot(angle_array, sensor_angle_list, 'o')
-    #plt.plot(fit_angle_array, fit_sensor_angle_array, 'r')
-    #plt.grid('on')
-    #plt.xlabel('motor position (deg)')
-    #plt.ylabel('em3242 sensor (deg)')
-    #plt.show()
 
 
 

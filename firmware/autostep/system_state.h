@@ -49,6 +49,7 @@ class SystemState
         Trajectory *trajectory_ptr_;
         SinTrajectory sin_trajectory_;
         void start_trajectory();
+        bool is_trajectory_running();
 
         // Message handlers
         void handle_json_message(JsonObject &json_msg, JsonObject &json_rsp);

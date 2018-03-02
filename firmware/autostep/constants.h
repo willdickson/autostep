@@ -14,4 +14,6 @@ extern const uint32_t Timer_Period;
 extern const float Position_Gain;
 extern const float Velocity_FFwd;
 
+extern const int Autoset_Num_Sample;
+
 #endif

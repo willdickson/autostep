@@ -187,6 +187,20 @@ void SystemState::start_trajectory()
     interval_timer_.begin(timer_callback_, Timer_Period);
 }
 
+
+bool SystemState::is_trajectory_running()
+{
+    if (trajectory_ptr_ != nullptr)
+    {
+        return  ((trajectory_ptr_ -> status()) != Trajectory::Done);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 void SystemState::handle_json_message(JsonObject &json_msg, JsonObject &json_rsp)
 {
     if (json_msg.containsKey("command"))
@@ -317,12 +331,10 @@ void SystemState::soft_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
 void SystemState::is_busy_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
     
-    bool is_busy = stepper_driver_.is_busy() || ((trajectory_ptr_ -> status()) != Trajectory::Done);
+    bool is_busy = stepper_driver_.is_busy() || is_trajectory_running(); 
     json_rsp["success"] = true;
     json_rsp["is_busy"] = is_busy;
 }
-
-
 
 
 void SystemState::move_to_command(JsonObject &json_msg, JsonObject &json_rsp)
@@ -522,7 +534,12 @@ void SystemState::get_voltage_sensor_command(JsonObject &json_msg, JsonObject &j
 
 void SystemState::autoset_position_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
-    stepper_driver_.set_position(angle_sensor_.position());
+    float angle = 0.0;
+    for (int i=0; i<Autoset_Num_Sample; i++)
+    {
+        angle += angle_sensor_.position()/float(Autoset_Num_Sample);
+    }
+    stepper_driver_.set_position(angle);
     json_rsp["success"] = true;
 }
 
