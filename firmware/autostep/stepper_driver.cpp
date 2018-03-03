@@ -22,9 +22,9 @@ const float StepperDriver::Default_Jog_Deceleration = 100.0;
 
 
 // Default Movement parameters max values (deg/sec and deg/sec^2)
-const float StepperDriver::Default_Max_Speed = 1000.0;
-const float StepperDriver::Default_Max_Acceleration = 2000.0;
-const float StepperDriver::Default_Max_Deceleration = 2000.0;
+const float StepperDriver::Default_Max_Speed = 4000.0;
+const float StepperDriver::Default_Max_Acceleration = 4000.0;
+const float StepperDriver::Default_Max_Deceleration = 4000.0;
 
 // Micro to full step transistion (deg/sec)
 const float StepperDriver::Default_Full_Speed = 500.0;        

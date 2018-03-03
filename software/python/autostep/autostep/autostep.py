@@ -376,8 +376,23 @@ if __name__ == '__main__':
     stepper.set_move_mode_to_jog()
     stepper.enable()
 
+    if 0:
+        """
+        Simple positioning move
 
-    if False:
+        """
+        stepper.set_move_mode_to_max()
+        stepper.move_to(90.0)
+        stepper.busy_wait()
+        time.sleep(1.0)
+        stepper.move_to(180.0)
+        stepper.busy_wait()
+        time.sleep(1.0)
+        stepper.move_to(0.0)
+        stepper.busy_wait()
+
+
+    if 0:
 
         """
         Generate sensor calibration
@@ -388,7 +403,7 @@ if __name__ == '__main__':
         stepper.save_sensor_calibration(cal_filename)
 
 
-    if True:
+    if 1:
 
         """
         Sinusoid test
@@ -400,12 +415,18 @@ if __name__ == '__main__':
         stepper.set_move_mode_to_max()
 
         param = { 
-                'amplitude': 30,
-                'period':  1,
+                'amplitude': 90.0,
+                'period':  1.2,
                 'phase':  90.0,
                 'offset': 100.0, 
                 'num_cycle': 2 
                 }
+
+        vel = param['amplitude']*(2.0*np.pi/param['period'])
+        acc = param['amplitude']*(2.0*np.pi/param['period'])**2
+        print('vel: {0:1.3f}'.format(vel))
+        print('acc: {0:1.3f}'.format(acc))
+
         data = stepper.sinusoid(param)
         stepper.busy_wait()
 
@@ -426,10 +447,23 @@ if __name__ == '__main__':
         line_list = [angl_line, setp_line, sens_line]
         label_list = 'driver', 'setpt', 'sensor'
         plt.figlegend(line_list, label_list, 'upper right')
+
+        plt.figure(2)
+        d_angl = (angl[1:] - angl[:-1])/(tsec[1:] - tsec[:-1])
+        plt.plot(tsec[1:], d_angl)
+        plt.xlabel('time (s)')
+        plt.ylabel('angular velocity (deg/sec)')
+        plt.grid('on')
+
+        plt.figure(3)
+        dd_angl = (d_angl[1:] - d_angl[:-1])/(tsec[2:] - tsec[1:-1])
+        plt.plot(tsec[2:], dd_angl)
+        plt.xlabel('time (s)')
+        plt.ylabel('angular accel (deg/sec**2)')
+        plt.grid('on')
+
+
         plt.show()
-    
-
-
 
 
 
