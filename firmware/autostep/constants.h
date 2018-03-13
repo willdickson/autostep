@@ -8,12 +8,14 @@ const int Json_Data_Buffer_Size = 500;
 
 extern const long Baudrate;
 extern const int Angle_Sensor_Pin;
+extern const int Stepper_Driver_Board_Num;
+extern const int Stepper_Driver_CS_Pin;
+extern const int Stepper_Driver_Reset_Pin;
+extern const int Stepper_Driver_Busy_Pin;
 
 extern const uint32_t Timer_Period;
-
 extern const float Position_Gain;
 extern const float Velocity_FFwd;
-
 extern const int Autoset_Num_Sample;
 
 #endif

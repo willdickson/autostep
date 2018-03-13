@@ -11,7 +11,7 @@ const int StepperDriver::Default_Board_Num = 0;
 const int StepperDriver::Default_CS_Pin = 10;
 const int StepperDriver::Default_Reset_Pin = 7;
 const int StepperDriver::Default_Busy_Pin = 8;
-const int StepperDriver::Default_Fullstep_Per_Rev = 200;  // Change this to Deg_Per_Fullstep (1.8)
+const int StepperDriver::Default_Fullstep_Per_Rev = 200;  
 const byte StepperDriver::Default_Step_Mode = STEP_FS_8;
 
 

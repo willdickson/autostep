@@ -11,6 +11,13 @@ SystemState::SystemState() {}
 
 void SystemState::initialize() 
 {
+    stepper_driver_ = StepperDriver( 
+            Stepper_Driver_Board_Num, 
+            Stepper_Driver_CS_Pin, 
+            Stepper_Driver_Reset_Pin, 
+            Stepper_Driver_Busy_Pin
+            );
+
     stepper_driver_.initialize();
     stepper_driver_.set_movement_params_to_jog();
     stepper_driver_.enable();
@@ -31,6 +38,11 @@ void SystemState::initialize()
     // --------------------------------------------------
     pinMode(2,OUTPUT);
     digitalWrite(2,LOW);
+    // --------------------------------------------------
+
+    // TEMPORARY  - mold rotation
+    // --------------------------------------------------
+    // stepper_driver_.run(30.0);
     // --------------------------------------------------
 }
 
@@ -306,6 +318,30 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
     else if (command.equals("set_step_mode"))
     {
         set_step_mode_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_fullstep_per_rev"))
+    {
+        get_fullstep_per_rev_command(json_msg, json_rsp);
+    }
+    else if (command.equals("set_fullstep_per_rev"))
+    {
+        set_fullstep_per_rev_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_jog_mode_params"))
+    {
+        get_jog_mode_params_command(json_msg, json_rsp);
+    }
+    else if (command.equals("set_jog_mode_params"))
+    {
+        set_jog_mode_params_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_max_mode_params"))
+    {
+        get_max_mode_params_command(json_msg, json_rsp);
+    }
+    else if (command.equals("set_max_mode_params"))
+    {
+        set_max_mode_params_command(json_msg, json_rsp);
     }
     else
     {
@@ -610,6 +646,128 @@ void SystemState::set_step_mode_command(JsonObject &json_msg, JsonObject &json_r
     {
         json_rsp["success"] = false;
         json_rsp["message"] = "missing step_mode";
+    }
+}
+
+
+void SystemState::get_fullstep_per_rev_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    json_rsp["success"] = true;
+    json_rsp["fullstep_per_rev"] = stepper_driver_.get_fullstep_per_rev();
+}
+
+
+void SystemState::set_fullstep_per_rev_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("fullstep_per_rev"))
+    {
+        int fullstep_per_rev = json_msg["fullstep_per_rev"];
+        if (fullstep_per_rev > 0)
+        {
+            stepper_driver_.set_fullstep_per_rev(fullstep_per_rev);
+            json_rsp["success"] = true;
+        }
+        else
+        {
+            json_rsp["success"] = false;
+            json_rsp["message"] = "fullstep_per_rev <= 0";
+        }
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing fullstep_per_rev";
+    }
+}
+
+MoveModeParams SystemState::get_move_mode_params(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    bool ok = true;
+    MoveModeParams params = {0.0,0.0,0.0};
+
+    String message= "missing";
+    if (json_msg.containsKey("speed"))
+    {
+        params.speed = json_msg["speed"];
+    }
+    else
+    {
+        ok = false;
+        message +=  ", speed";
+    }
+
+    if (json_msg.containsKey("accel"))
+    {
+        params.acceleration = json_msg["accel"];
+    }
+    else
+    {
+        ok = false;
+        message += ", accel";
+    }
+
+    if (json_msg.containsKey("decel"))
+    {
+        params.deceleration = json_msg["decel"];
+    }
+    else
+    {
+        ok = false;
+        message += ", decel";
+    }
+            
+    if (ok)
+    {
+        json_rsp["success"] = true;
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = message;
+    }
+
+    return params;
+}
+
+
+void SystemState::get_jog_mode_params_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    json_rsp["success"] = true;
+    json_rsp["speed"] = stepper_driver_.get_jog_speed();
+    json_rsp["accel"] = stepper_driver_.get_jog_acceleration();
+    json_rsp["decel"] = stepper_driver_.get_jog_deceleration();
+}
+
+
+void SystemState::set_jog_mode_params_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    MoveModeParams params = get_move_mode_params(json_msg, json_rsp);
+    if (json_rsp["success"])
+    {
+        stepper_driver_.set_jog_speed(params.speed);
+        stepper_driver_.set_jog_acceleration(params.acceleration);
+        stepper_driver_.set_jog_deceleration(params.deceleration);
+    }
+}
+
+
+void SystemState::get_max_mode_params_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    json_rsp["success"] = true;
+    json_rsp["speed"] = stepper_driver_.get_max_speed();
+    json_rsp["accel"] = stepper_driver_.get_max_acceleration();
+    json_rsp["decel"] = stepper_driver_.get_max_deceleration();
+}
+
+
+void SystemState::set_max_mode_params_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    MoveModeParams params = get_move_mode_params(json_msg, json_rsp);
+    if (json_rsp["success"])
+    {
+        stepper_driver_.set_max_speed(params.speed);
+        stepper_driver_.set_max_acceleration(params.acceleration);
+        stepper_driver_.set_max_deceleration(params.deceleration);
     }
 }
 

@@ -26,6 +26,8 @@ class Autostep(serial.Serial):
             'STEP_FS_128'
             ]
 
+    MoveModeKeys = 'speed', 'accel', 'decel'
+
     def __init__(self, port, timeout=DefaultTimeout, reset_sleep=DefaultResetSleep, debug=False):
         """ Constructor
         """
@@ -357,6 +359,45 @@ class Autostep(serial.Serial):
         self.sensor_cal = None
 
 
+    def get_fullstep_per_rev(self):
+        cmd_dict = {'command': 'get_fullstep_per_rev'}
+        rsp_dict = self.send_cmd(cmd_dict)
+        return rsp_dict['fullstep_per_rev']
+
+
+    def set_fullstep_per_rev(self,value):
+        int_value = int(value)
+        if int_value <= 0:
+            raise ValueError, 'fullstep_per_rev must > 0'
+        cmd_dict = {'command': 'set_fullstep_per_rev', 'fullstep_per_rev': int_value}
+        self.send_cmd(cmd_dict)
+
+
+    def get_jog_mode_params(self):
+        cmd_dict = {'command': 'get_jog_mode_params'}
+        rsp_dict = self.send_cmd(cmd_dict)
+        return {k:rsp_dict[k] for k in self.MoveModeKeys}
+
+
+    def set_jog_mode_params(self,params):
+        cmd_dict = {k:params[k] for k in self.MoveModeKeys}
+        cmd_dict['command'] = 'set_jog_mode_params'
+        cmd_dict.update(params)
+        self.send_cmd(cmd_dict)
+
+
+    def get_max_mode_params(self):
+        cmd_dict = {'command': 'get_max_mode_params'}
+        rsp_dict = self.send_cmd(cmd_dict)
+        return {k:rsp_dict[k] for k in self.MoveModeKeys}
+
+
+    def set_max_mode_params(self,params):
+        cmd_dict = {k:params[k] for k in self.MoveModeKeys}
+        cmd_dict['command'] = 'set_max_mode_params'
+        self.send_cmd(cmd_dict)
+
+
     def atexit_cleanup(self):
         pass
 
@@ -375,6 +416,16 @@ if __name__ == '__main__':
     stepper.set_step_mode('STEP_FS_128') 
     stepper.set_move_mode_to_jog()
     stepper.enable()
+
+    print('jog_mode_params:  ', stepper.get_jog_mode_params())
+    print('max_mode_params:  ', stepper.get_max_mode_params())
+
+    stepper.run(0.0)
+    stepper.set_jog_mode_params({'speed':200, 'accel': 200, 'decel': 200})
+    stepper.set_max_mode_params({'speed':3000, 'accel': 3500, 'decel': 2000})
+
+    print('jog_mode_params:  ', stepper.get_jog_mode_params())
+    print('max_mode_params:  ', stepper.get_max_mode_params())
 
     if 0:
         """
@@ -403,7 +454,7 @@ if __name__ == '__main__':
         stepper.save_sensor_calibration(cal_filename)
 
 
-    if 1:
+    if 0:
 
         """
         Sinusoid test
