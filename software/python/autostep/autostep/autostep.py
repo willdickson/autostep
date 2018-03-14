@@ -9,6 +9,11 @@ import matplotlib.pyplot as plt
 
 class Autostep(serial.Serial):
 
+    """
+    Provides serial interface to the Autostep firmware for controlling the
+    LM6470 dSPIN motor driver (as implemented in the Sparkfun Autodriver).
+    """
+
     Baudrate = 115200
     BusyWaitSleepDt = 0.05
     DefaultTimeout = 10.0
@@ -26,11 +31,35 @@ class Autostep(serial.Serial):
             'STEP_FS_128'
             ]
 
-    MoveModeKeys = 'speed', 'accel', 'decel'
+    MoveModeKeys = ('speed', 'accel', 'decel')
+    MoveModeUnits = {
+            'speed': '(deg/sec)', 
+            'accel': '(deg/sec**2)',
+            'decel': '(deg/sec**2)',
+            }
+
+    KvalKeys = ('accel', 'decel', 'run', 'hold')
+
+    OC_ThresholdList = [ 
+            "OC_375mA",
+            "OC_750mA",
+            "OC_1125mA",
+            "OC_1500mA",
+            "OC_1875mA",
+            "OC_2250mA",
+            "OC_2625mA",
+            "OC_3000mA",
+            "OC_3375mA",
+            "OC_3750mA",
+            "OC_4125mA",
+            "OC_4500mA",
+            "OC_4875mA",
+            "OC_5250mA",
+            "OC_5625mA",
+            "OC_6000mA",
+            ]
 
     def __init__(self, port, timeout=DefaultTimeout, reset_sleep=DefaultResetSleep, debug=False):
-        """ Constructor
-        """
         params = {'baudrate': self.Baudrate, 'timeout': timeout}
         super(Autostep,self).__init__(port,**params)
         time.sleep(reset_sleep)
@@ -344,28 +373,51 @@ class Autostep(serial.Serial):
 
 
     def apply_sensor_calibration(self,value):
-        return np.interp(value, self.sensor_cal[:,0], self.sensor_cal[:,1])
+        """
+        Applies sensor calibration - converts values measured by sensor to motor position in
+        degrees. 
+        """
+        if self.sensor_cal is not None:
+            return np.interp(value, self.sensor_cal[:,0], self.sensor_cal[:,1])
+        else:
+            return value
 
 
     def save_sensor_calibration(self,filename):
-        np.savetxt(filename, self.sensor_cal)
+        """
+        Saves sensor calibration (if it exists) to a file.
+        """
+        if self.sensor_cal is not None:
+            np.savetxt(filename, self.sensor_cal)
 
 
     def load_sensor_calibration(self,filename):
+        """
+        Loads the sensor calibration from a file.
+        """
         self.sensor_cal = np.loadtxt(filename)
 
 
     def clear_sensor_calibration(self):
+        """
+        Clears any existing sensor calibration data.
+        """
         self.sensor_cal = None
 
 
     def get_fullstep_per_rev(self):
+        """
+        Get the fullsteps/revolution for the stepper motor.
+        """
         cmd_dict = {'command': 'get_fullstep_per_rev'}
         rsp_dict = self.send_cmd(cmd_dict)
         return rsp_dict['fullstep_per_rev']
 
 
     def set_fullstep_per_rev(self,value):
+        """
+        Set the fullstep/revolution setting for the stepper motor.
+        """
         int_value = int(value)
         if int_value <= 0:
             raise ValueError, 'fullstep_per_rev must > 0'
@@ -374,12 +426,20 @@ class Autostep(serial.Serial):
 
 
     def get_jog_mode_params(self):
+        """
+        Get the set of parameters used for 'jog' movement mode. 
+        speed (deg/sec), accel (deg/sec**2) and decel  (deg/sec**2).
+        """
         cmd_dict = {'command': 'get_jog_mode_params'}
         rsp_dict = self.send_cmd(cmd_dict)
         return {k:rsp_dict[k] for k in self.MoveModeKeys}
 
 
     def set_jog_mode_params(self,params):
+        """
+        Set the paramaters used for 'jog' movement mode. 
+        speed (deg/sec), accel (deg/sec**2) and decel  (deg/sec**2).
+        """
         cmd_dict = {k:params[k] for k in self.MoveModeKeys}
         cmd_dict['command'] = 'set_jog_mode_params'
         cmd_dict.update(params)
@@ -387,15 +447,106 @@ class Autostep(serial.Serial):
 
 
     def get_max_mode_params(self):
+        """
+        Get the set of parameters used for 'max' movement mode. 
+        speed (deg/sec), accel (deg/sec**2) and decel  (deg/sec**2).
+        """
         cmd_dict = {'command': 'get_max_mode_params'}
         rsp_dict = self.send_cmd(cmd_dict)
         return {k:rsp_dict[k] for k in self.MoveModeKeys}
 
 
     def set_max_mode_params(self,params):
+        """
+        Set the paramaters used for 'max' movement mode. 
+        speed (deg/sec), accel (deg/sec**2) and decel  (deg/sec**2).
+        """
         cmd_dict = {k:params[k] for k in self.MoveModeKeys}
         cmd_dict['command'] = 'set_max_mode_params'
         self.send_cmd(cmd_dict)
+
+
+    def get_kval_params(self):
+        """
+        Get the kval parameters. The kval parameters are coefficients
+        which scale the sinewave amplitudes used for phase current control.
+
+        Returns a dict with parameters accel, decel, run and hold.  Parameters
+        have 0-255 value range. 
+    
+        """
+        cmd_dict = {'command': 'get_kval_params'}
+        rsp_dict = self.send_cmd(cmd_dict)
+        return {k:rsp_dict[k] for k in self.KvalKeys}
+
+
+    def set_kval_params(self,params):
+        """
+        Set the kval parameters. The kval parameters are coefficients
+        which scale the sinewave amplitudes used for phase current control.
+
+        Takes a dict with parameters accel, decel, run and hold.  Parameters
+        have 0-255 value range. 
+        """
+        cmd_dict = {k:params[k] for k in self.KvalKeys}
+        cmd_dict['command'] = 'set_kval_params'
+        self.send_cmd(cmd_dict)
+
+
+    def get_oc_threshold(self):
+        """
+        Get the overcurrent threshold. The overcurrent threshold set the current at which an
+        overcurrent event (disable) occurs.
+        """ 
+        cmd_dict = {'command': 'get_oc_threshold'}
+        rsp_dict = self.send_cmd(cmd_dict)
+        return rsp_dict['threshold']
+
+
+    def set_oc_threshold(self,threshold):
+        """
+        Set the overcurrent threshold. The overcurrent threshold set the current at which an
+        overcurrent event (disable) occurs.
+
+        The value must be in the OC_ThresholdList. 
+        """
+        if not threshold in self.OC_ThresholdList:
+            raise ValueError, 'unknown oc_threshold'
+        cmd_dict = {'command': 'set_oc_threshold', 'threshold': threshold}
+        self.send_cmd(cmd_dict)
+
+    
+    def print_params(self):
+        """
+        Prints the stepper driver parameters.
+        """
+        fullstep_per_rev = self.get_fullstep_per_rev()
+        step_mode = self.get_step_mode()
+        oc_threshold = self.get_oc_threshold()
+        jog_mode_params = self.get_jog_mode_params()
+        max_mode_params = self.get_max_mode_params()
+        kval_params = self.get_kval_params()
+
+        print()
+        print('Autostep Parameters')
+        print('----------------------------')
+        print()
+        print('fullstep/rev:  {0}'.format(fullstep_per_rev))
+        print('step mode:     {0}'.format(step_mode))
+        print('oc threshold:  {0}'.format(oc_threshold))
+        print()
+        print('jog mode:')
+        for k,v in jog_mode_params.iteritems():
+            print('  {0}: {1} {2}'.format(k,v,self.MoveModeUnits[k]))
+        print()
+        print('max mode:')
+        for k, v in max_mode_params.iteritems():
+            print('  {0}: {1} {2}'.format(k,v,self.MoveModeUnits[k]))
+        print()
+        print('kvals (0-255): ')
+        for k,v in kval_params.iteritems():
+            print('  {0:<6} {1}'.format(k+':',v))
+        print()
 
 
     def atexit_cleanup(self):
@@ -414,18 +565,12 @@ if __name__ == '__main__':
 
     stepper = Autostep(port)
     stepper.set_step_mode('STEP_FS_128') 
-    stepper.set_move_mode_to_jog()
+    stepper.set_fullstep_per_rev(200)
+    stepper.set_move_mode_to_max()
     stepper.enable()
 
-    print('jog_mode_params:  ', stepper.get_jog_mode_params())
-    print('max_mode_params:  ', stepper.get_max_mode_params())
+    stepper.print_params()
 
-    stepper.run(0.0)
-    stepper.set_jog_mode_params({'speed':200, 'accel': 200, 'decel': 200})
-    stepper.set_max_mode_params({'speed':3000, 'accel': 3500, 'decel': 2000})
-
-    print('jog_mode_params:  ', stepper.get_jog_mode_params())
-    print('max_mode_params:  ', stepper.get_max_mode_params())
 
     if 0:
         """

@@ -10,6 +10,7 @@
 #include "velocity_controller.h"
 #include "ArduinoJson.h"
 
+
 struct MoveModeParams 
 {
     float speed;
@@ -101,6 +102,12 @@ class SystemState
         void set_jog_mode_params_command(JsonObject &json_msg, JsonObject &json_rsp);
         void get_max_mode_params_command(JsonObject &json_msg, JsonObject &json_rsp);
         void set_max_mode_params_command(JsonObject &json_msg, JsonObject &json_rsp);
+
+        void get_kval_params_command(JsonObject &json_msg, JsonObject &json_rsp);
+        void set_kval_params_command(JsonObject &json_msg, JsonObject &json_rsp);
+
+        void get_oc_threshold_command(JsonObject &json_msg, JsonObject &json_rsp);
+        void set_oc_threshold_command(JsonObject &json_msg, JsonObject &json_rsp);
 
 };
 

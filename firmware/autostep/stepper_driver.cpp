@@ -266,6 +266,74 @@ String StepperDriver::get_step_mode_string()
 }
 
 
+void StepperDriver::set_acceleration_kval(byte kval)
+{
+    driver_ptr_ -> setAccKVAL(kval);
+}
+
+
+byte StepperDriver::get_acceleration_kval()
+{
+    return driver_ptr_ -> getAccKVAL();
+}
+
+
+void StepperDriver::set_deceleration_kval(byte kval)
+{
+    driver_ptr_ -> setDecKVAL(kval);
+}
+
+
+byte StepperDriver::get_deceleration_kval()
+{
+    return driver_ptr_ -> getDecKVAL();
+}
+
+
+void StepperDriver::set_run_kval(byte kval)
+{
+    driver_ptr_ -> setRunKVAL(kval);
+}
+
+
+byte StepperDriver::get_run_kval()
+{
+    return driver_ptr_ -> getRunKVAL();
+}
+
+
+void StepperDriver::set_hold_kval(byte kval)
+{
+    driver_ptr_ -> setHoldKVAL(kval);
+}
+
+
+byte StepperDriver::get_hold_kval()
+{
+    return driver_ptr_ -> getHoldKVAL();
+}
+
+
+bool StepperDriver::set_oc_threshold(String threshold_string)
+{
+    bool ok= false;
+    byte threshold_byte = get_oc_threshold_from_string(threshold_string, ok);
+    if (ok)
+    {
+        driver_ptr_ -> setOCThreshold(threshold_byte) ;
+    }
+    return ok; 
+}
+
+
+String StepperDriver::get_oc_threshold()
+{
+    byte threshold_byte = driver_ptr_ -> getOCThreshold();
+    return get_string_from_oc_threshold(threshold_byte);
+}
+
+
+
 // Setters & getters for motion parameters
 // ------------------------------------------------------------------------------------------------
 
@@ -701,6 +769,84 @@ String get_string_from_oc_threshold(byte thresh)
     }
 
     return thresh_string;
+}
+
+
+byte get_oc_threshold_from_string(String thresh_string, bool &found)
+{
+    byte thresh  = 0;
+
+    found = true;
+
+    if (thresh_string.equals("OC_375mA"))
+    {
+        thresh = OC_375mA;
+    }
+    else if (thresh_string.equals("OC_750mA"))
+    {
+        thresh = OC_750mA;
+    }
+    else if (thresh_string.equals("OC_1125mA"))
+    {
+        thresh = OC_1125mA;
+    }
+    else if (thresh_string.equals("OC_1500mA"))
+    {
+        thresh = OC_1500mA;
+    }
+    else if (thresh_string.equals("OC_1875mA"))
+    {
+        thresh = OC_1875mA;
+    }
+    else if (thresh_string.equals("OC_2250mA"))
+    {
+        thresh = OC_2250mA;
+    }
+    else if (thresh_string.equals("OC_2625mA"))
+    {
+        thresh = OC_2625mA;
+    }
+    else if (thresh_string.equals("OC_3000mA"))
+    {
+        thresh = OC_3000mA;
+    }
+    else if (thresh_string.equals("OC_3375mA"))
+    {
+        thresh = OC_3375mA;
+    }
+    else if (thresh_string.equals("OC_3750mA"))
+    {
+        thresh = OC_3750mA;
+    }
+    else if (thresh_string.equals("OC_4125mA"))
+    {
+        thresh = OC_4125mA;
+    }
+    else if (thresh_string.equals("OC_4500mA"))
+    {
+        thresh = OC_4500mA;
+    }
+    else if (thresh_string.equals("OC_4875mA"))
+    {
+        thresh = OC_4875mA;
+    }
+    else if (thresh_string.equals("OC_5250mA"))
+    {
+        thresh = OC_5250mA;
+    }
+    else if (thresh_string.equals("OC_5625mA"))
+    {
+        thresh = OC_5625mA;
+    }
+    else if (thresh_string.equals("OC_6000mA"))
+    {
+        thresh = OC_6000mA;
+    }
+    else
+    {
+        found = false;
+    }
+    return thresh;
 }
 
 

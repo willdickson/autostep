@@ -65,6 +65,21 @@ class StepperDriver
         bool set_step_mode(String step_mode_string);
         String get_step_mode_string();
 
+        void set_acceleration_kval(byte kval);
+        byte get_acceleration_kval();
+
+        void set_deceleration_kval(byte kval);
+        byte get_deceleration_kval();
+
+        void set_run_kval(byte kval);
+        byte get_run_kval();
+
+        void set_hold_kval(byte kval);
+        byte get_hold_kval();
+
+        bool set_oc_threshold(String threshold_string);
+        String get_oc_threshold();
+
         // Setter & Getters for motion parameters
         // ----------------------------------------------------------------------------------------
         void set_jog_speed(float speed);
@@ -169,6 +184,7 @@ class StepperDriver
 bool get_step_mode_from_string(String step_mode_string, byte &step_mode);
 String get_string_from_step_mode(byte step_mode);
 String get_string_from_oc_threshold(byte thresh);
+byte get_oc_threshold_from_string(String thresh_string, bool &ok);
 
 
 

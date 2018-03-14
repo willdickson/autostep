@@ -21,7 +21,9 @@ void SystemState::initialize()
     stepper_driver_.initialize();
     stepper_driver_.set_movement_params_to_jog();
     stepper_driver_.enable();
+
     angle_sensor_.initialize(Angle_Sensor_Pin);
+
     message_receiver_.reset();
 
     velocity_controller_.set_position_gain(Position_Gain);
@@ -342,6 +344,22 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
     else if (command.equals("set_max_mode_params"))
     {
         set_max_mode_params_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_kval_params"))
+    {
+        get_kval_params_command(json_msg, json_rsp);
+    }
+    else if (command.equals("set_kval_params"))
+    {
+        set_kval_params_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_oc_threshold"))
+    {
+        get_oc_threshold_command(json_msg, json_rsp);
+    }
+    else if (command.equals("set_oc_threshold"))
+    {
+        set_oc_threshold_command(json_msg, json_rsp);
     }
     else
     {
@@ -770,6 +788,115 @@ void SystemState::set_max_mode_params_command(JsonObject &json_msg, JsonObject &
         stepper_driver_.set_max_deceleration(params.deceleration);
     }
 }
+
+
+void SystemState::get_kval_params_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    json_rsp["success"] = true;
+    json_rsp["accel"] =  stepper_driver_.get_acceleration_kval();
+    json_rsp["decel"] =  stepper_driver_.get_deceleration_kval();
+    json_rsp["run"] =  stepper_driver_.get_run_kval();
+    json_rsp["hold"] =  stepper_driver_.get_hold_kval();
+}
+
+
+void SystemState::set_kval_params_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    bool ok = true;
+    String message = "missing";
+
+    byte accel_kval = 0;
+    if (json_msg.containsKey("accel"))
+    {
+        accel_kval = json_msg["accel"];
+    }
+    else
+    {
+        ok = false;
+        message += ", accel";
+    }
+
+    byte decel_kval = 0;
+    if (json_msg.containsKey("decel"))
+    {
+        decel_kval = json_msg["decel"];
+    }
+    else
+    {
+        ok = false;
+        message += ", decel";
+    }
+
+    byte run_kval = 0;
+    if (json_msg.containsKey("run"))
+    {
+        run_kval = json_msg["run"];
+    }
+    else
+    {
+        ok = false;
+        message += ", run";
+    }
+
+    byte hold_kval = 0;
+    if (json_msg.containsKey("hold"))
+    {
+        hold_kval = json_msg["hold"];
+    }
+    else
+    {
+        ok = false;
+        message += ", hold";
+    }
+
+    if (ok)
+    {
+        json_rsp["success"] = true;
+        stepper_driver_.set_acceleration_kval(accel_kval);
+        stepper_driver_.set_deceleration_kval(decel_kval);
+        stepper_driver_.set_run_kval(run_kval);
+        stepper_driver_.set_hold_kval(hold_kval);
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = message;
+    }
+}
+
+
+
+void SystemState::get_oc_threshold_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    json_rsp["success"] = true;
+    json_rsp["threshold"] = stepper_driver_.get_oc_threshold();
+}
+
+
+void SystemState::set_oc_threshold_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("threshold"))
+    {
+        String threshold = json_msg["threshold"];
+        bool ok = stepper_driver_.set_oc_threshold(threshold);
+        if (ok)
+        {
+            json_rsp["success"] = true;
+        }
+        else
+        {
+            json_rsp["success"] = false;
+            json_rsp["message"] = "invalid threshold";
+        }
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing threshold";
+    }
+}
+
+
 
 
 
