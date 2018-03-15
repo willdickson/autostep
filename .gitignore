@@ -3,3 +3,4 @@
 *.pyc
 *.hdf5
 *.cal
+node_modules

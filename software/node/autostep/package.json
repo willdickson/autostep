@@ -1,0 +1,19 @@
+{
+  "name": "autostep",
+  "version": "0.0.1",
+  "description": "Provides a serial interface for controlling stepper motors via the LM6470 dSPIN motor driver",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "USB",
+    "serial",
+    "stepper motor"
+  ],
+  "author": "Will Dickson <wbd@caltech.edu",
+  "license": "MIT",
+  "dependencies": {
+    "serialport": "^6.1.1"
+  }
+}

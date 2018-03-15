@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 class Autostep(serial.Serial):
 
     """
-    Provides serial interface to the Autostep firmware for controlling the
+    Provides a serial interface to the Autostep firmware for controlling the
     LM6470 dSPIN motor driver (as implemented in the Sparkfun Autodriver).
     """
 
