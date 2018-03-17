@@ -11,12 +11,17 @@ stepper.set_move_mode_to_max()
 stepper.enable()
 
 param = { 
-        'amplitude': 90.0,
-        'period':  1.2,
+        'amplitude': 85.0,
+        'period':  0.4,
         'phase':  90.0,
-        'offset': 100.0, 
-        'num_cycle': 2 
+        'offset': 0.0, 
+        'num_cycle': 10 
         }
+
+vel = param['amplitude']*(2.0*np.pi/param['period'])
+acc = param['amplitude']*(2.0*np.pi/param['period'])**2
+print('vel: {0:1.2f}'.format(vel))
+print('acc: {0:1.2f}'.format(acc))
 
 data = stepper.sinusoid(param)
 stepper.busy_wait()
