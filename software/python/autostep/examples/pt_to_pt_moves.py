@@ -7,7 +7,7 @@ port = '/dev/ttyACM0'
 stepper = Autostep(port)
 stepper.set_step_mode('STEP_FS_128') 
 stepper.set_fullstep_per_rev(200)
-stepper.set_move_mode_to_max()
+stepper.set_move_mode_to_jog()
 stepper.enable()
 
 stepper.set_position(0.0)
@@ -18,4 +18,5 @@ for pos in pos_list:
     print(pos)
     stepper.move_to(pos)  
     stepper.busy_wait()
+    time.sleep(2.0)
 

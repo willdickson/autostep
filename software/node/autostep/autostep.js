@@ -1,4 +1,5 @@
 "use strict";
+const util = require('util');
 
 let SerialDevice = require('./serialdevice');
 
@@ -11,56 +12,45 @@ class Autostep {
     this.device = new SerialDevice(port, {buadRate: BAUDRATE}, callback);
   }
 
-
-  enable(callback) {
-    let cmd = {command: 'enable'};
-    this._sendCmdGetRsp(cmd, (err, rsp) =>  {
-      if (callback) callback(err, rsp); 
-    });
+  enable(callback) { 
+    const cmd = {command: 'enable'};
+    return this._sendCmd(cmd,callback);
   }
 
-
   release(callback) {
-    let cmd = {command: 'release'};
-    this._sendCmdGetRsp(cmd, (err, rsp) =>  {
-      if (callback) callback(err, rsp); 
-    });
+    const cmd = {command: 'release'};
+    return this._sendCmd(cmd,callback);
   }
 
   run(velocity, callback) {
-    let cmd = {command: 'run', velocity: velocity};
-    this._sendCmdGetRsp(cmd, (err, rsp) =>  {
-      if (callback) callback(err, rsp); 
-    });
+    const cmd = {command: 'run', velocity: velocity};
+    return this._sendCmd(cmd,callback);
   }
-
-
-  // --------------------------------------------------------------------------- 
-  _getCmdRsp(err, msg) {
-    if (err) {
-      return {success: false};
-    } else {
-      let msgObj = JSON.parse(msg);
-      return msgObj;
-    }
-  }
-
 
   _sendCmd(cmd, callback) {
-    this.device.sendCmd(JSON.stringify(cmd), callback);
+    const promise = new Promise((resolve,reject) => {
+      this.device.sendCmd(JSON.stringify(cmd), (err,rsp) => {
+        if (err) {
+          reject(err);
+        } else {
+          let rspObj = null;
+          try {
+            rspObj = JSON.parse(rsp);
+          } catch(err) {
+            reject(err);
+          }
+          resolve(rspObj);
+        }
+      });
+    });
+
+    if (callback && typeof callback == 'function') {
+      promise
+        .then(  (rsp) => callback(null,rsp))
+        .catch( (err) => callback(err,null));
+    }
+    return promise;
   };
-
-
-  _sendCmdGetRsp(cmd, callback) {
-    var wrappedCallback = (err,msg) => {
-      let rsp = this._getCmdRsp(err, msg);
-      callback(err,rsp);
-    };
-
-    this._sendCmd(cmd, wrappedCallback);
-  };
-
-
 }
 
 module.exports = Autostep;

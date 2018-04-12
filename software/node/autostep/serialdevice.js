@@ -13,13 +13,6 @@ class SerialDevice {
     this.busy = false;
     this.cmdQueue = [];
     this.cmdCurrent = null;
-
-    //let serialOptions = options;
-    //if (!('parser' in options)) {
-    //  serialOptions.parser = SerialPort.parsers.readline('\n');
-    //}
-    //this.serial = new SerialPort(port,serialOptions);
-
     this.serial = new SerialPort(port,options);
     this.serial.pipe(parser);
   
