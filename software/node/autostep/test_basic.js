@@ -2,29 +2,41 @@
 
 let Autostep = require('./autostep');
 
+const runStepper = async function()  {
 
-let stepper = new Autostep('/dev/ttyACM0', async (err) => {
+  const stepper = await Autostep.createNew('/dev/ttyACM0');
 
-  if (err) {
-    console.log('open failed: ' + err);
-  } else {
+  await stepper.printParams();
 
-    let rsp = await stepper.enable();
-    console.log(rsp);
+  //let rsp = null;
+  //let step = 360;
+  //let num = 5;
+
+  //for (let pos=0; pos<num*step; pos+=step) {
+
+  //  console.log('pos = ' + pos);
+
+  //  rsp = await stepper.moveTo(pos);
+  //  await stepper.busyWait();
+
+  //  rsp = await stepper.getPosition();
+  //  console.log(rsp);
+  //  console.log();
+
+  //}
+
+  //rsp = await stepper.moveTo(0);
+  //await stepper.busyWait();
+
+  //rsp = await stepper.getPosition();
+  //console.log(rsp);
+  //console.log();
 
 
-
-    stepper.run(100, (err,rsp) => {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log(rsp);
-      }
-    });
+}
+runStepper();
 
 
-  }
-}); 
 
 
 

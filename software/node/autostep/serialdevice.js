@@ -16,8 +16,10 @@ class SerialDevice {
     this.serial = new SerialPort(port,options);
     this.serial.pipe(parser);
   
-
-    let onDataCallback = (data) => {
+    if (openCallback && typeof openCallback == 'function') {
+      this.serial.on('open', openCallback);
+    }
+    let dataCallback = (data) => {
       if (!this.cmdCurrent) {
         return;
       }
@@ -32,10 +34,8 @@ class SerialDevice {
         });
       } 
       this.processQueue();
-    };
-
-    this.serial.on('open', openCallback);
-    this.serial.on('data', onDataCallback); 
+    }
+    this.serial.on('data', dataCallback); 
   }
 
   sendCmd(data,callback) {
@@ -64,7 +64,7 @@ class SerialDevice {
     }
   }
 
-};
+}
 
 module.exports = SerialDevice;
 
