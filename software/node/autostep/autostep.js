@@ -49,10 +49,10 @@ class Autostep {
     return this._sendCmd(cmd,callback);
   }
 
-  sinusoid(param, callback) {
-    //////////////////////////////////////////////////////////////////////////////////
-    // TODO
-    //////////////////////////////////////////////////////////////////////////////////
+  sinusoid(params,cmdCallback,streamCallback) {
+    const cmd = {command: 'sinusoid', ...params};
+    this.device.setStreamCallback(streamCallback);
+    return this._sendCmd(cmd,cmdCallback);
   }
 
   moveTo(position, callback) {

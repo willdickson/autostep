@@ -15,14 +15,26 @@ class SerialDevice {
     this.cmdCurrent = null;
     this.serial = new SerialPort(port,options);
     this.serial.pipe(parser);
+    this.streamCallback = null;
   
     if (openCallback && typeof openCallback == 'function') {
       this.serial.on('open', openCallback);
     }
     let dataCallback = (data) => {
       if (!this.cmdCurrent) {
+        if (this.streamCallback) {
+          let dataObj = null;
+          let parseErr = null;
+          try {
+            dataObj = JSON.parse(data);
+          } catch (err) {
+            parseErr = err;
+          }
+          this.streamCallback(parseErr, dataObj);
+        }
         return;
-      }
+      } 
+
       let moreFlag = false;
       if (this.cmdCurrent.callback) { 
         moreFlag = this.cmdCurrent.callback(null,data)
@@ -36,6 +48,11 @@ class SerialDevice {
       this.processQueue();
     }
     this.serial.on('data', dataCallback); 
+  }
+
+  setStreamCallback(streamCallback)
+  {
+    this.streamCallback = streamCallback;
   }
 
   sendCmd(data,callback) {
