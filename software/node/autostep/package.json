@@ -14,6 +14,7 @@
   "author": "Will Dickson <wbd@caltech.edu",
   "license": "MIT",
   "dependencies": {
+    "lodash": "^4.17.5",
     "serialport": "^6.1.1"
   }
 }

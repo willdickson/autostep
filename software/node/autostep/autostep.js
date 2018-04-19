@@ -1,5 +1,5 @@
 "use strict";
-const util = require('util');
+const _ = require('lodash');
 
 let SerialDevice = require('./serialdevice');
 
@@ -270,7 +270,7 @@ class Autostep {
       for (let key in params) {
         let value = params[key];
         let units = MOVE_MODE_UNITS[key];
-        console.log('  ' + key + ': ' + value + ' ' + units);
+        console.log('  ' + _.padEnd(key,5) + ': ' + value + ' ' + units);
       }
     };
     console.log('jog mode:');
@@ -284,8 +284,9 @@ class Autostep {
     console.log('kvals (0-255)');
     for (let key in kvalParams) {
       let value = kvalParams[key];
-      console.log('  ' + key + ': ' + value);
+      console.log('  ' + _.padEnd(key,5) + ': ' + value);
     }
+    console.log('---------------------------');
     console.log();
   }
 
