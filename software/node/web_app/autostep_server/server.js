@@ -29,7 +29,7 @@ const stepper = new Autostep(serialPortName, async () => {
   if (rsp.success) {
     console.log('* stepper zeroed');
   }
-  //await stepper.printParams();
+  await stepper.printParams();
 });
 
 
@@ -49,7 +49,7 @@ io.on('connection', function (socket) {
   console.log('* got new connection');
 
   socket.on('testMessage', async function (data) {
-    console.log('got testMessage: ' + JSON.stringify(testMessage));
+    console.log('got testMessage: ' + JSON.stringify(data));
   });
 
 });
