@@ -21,14 +21,30 @@ const staticFileDir = path.join(clientDistDir, 'static');
 
 const stepper = new Autostep(serialPortName, async () => {
   console.log('* stepper connected');
-  let rsp = await stepper.enable();
+
+  let rsp = null;
+
+  rsp = await stepper.setMoveModeToJog();
+  if (rsp.success) {
+    console.log('* move mode set to jog');
+  } else {
+    console.log('* failed to set move mode');
+  }
+
+  rsp = await stepper.enable();
   if (rsp.success) {
     console.log('* stepper enabled');
+  } else {
+    console.log('* failed to enable stepper');
   }
+
   rsp = await stepper.moveTo(0);
   if (rsp.success) {
     console.log('* stepper zeroed');
+  } else {
+    console.log('* failed to zero stepper');
   }
+
   await stepper.printParams();
 });
 

@@ -1,6 +1,6 @@
 <template>
   <div class="sinusoid">
-    <h3> {{msg}} </h3>
+    {{msg}}
   </div>
 </template>
 

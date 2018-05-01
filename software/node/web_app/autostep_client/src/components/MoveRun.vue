@@ -1,6 +1,6 @@
 <template>
-  <div class="moverun">
-    <h3> {{msg}} </h3>
+  <div class="moverun"> 
+    {{msg}} 
   </div>
 </template>
 

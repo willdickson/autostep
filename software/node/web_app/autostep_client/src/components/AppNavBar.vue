@@ -1,25 +1,25 @@
 <template>
   <div class="appnavbar">
-    <b-navbar toggleable="md" type="dark" variant="primary"> 
-      <b-navbar-brand> Autostep </b-navbar-brand>
 
-      <b-navbar-nav>
-        <b-nav-item-dropdown text="Option" right>
-          <b-dropdown-item to="configuration">
-            Configuration
-          </b-dropdown-item>
-          <b-dropdown-item to="moverun">
-            Move/Run
-          </b-dropdown-item>
-          <b-dropdown-item to="sinusoid">
-            Sinusoid
-          </b-dropdown-item>
-        </b-nav-item-dropdown>
+    <div>
+      <b-navbar toggleable="md" type="dark" variant="primary"> 
+        <b-navbar-brand> Autostep Controller</b-navbar-brand>
+      </b-navbar>
+    </div>
 
-      </b-navbar-nav>
-
-    </b-navbar>
-
+    <div>
+      <b-nav tabs>
+        <b-nav-item to="configuration">
+          Configuration
+        </b-nav-item>
+        <b-nav-item to="moverun">
+          Move/Run
+        </b-nav-item>
+        <b-nav-item to="sinusoid">
+          Sinusoid
+        </b-nav-item>
+      </b-nav>
+    </div>
 
   </div>
 </template>

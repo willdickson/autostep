@@ -6,11 +6,19 @@ const runStepper = async function()  {
 
   const stepper = await Autostep.createNew('/dev/ttyACM0');
 
+  let rsp = null;
+
+  rsp = await stepper.setMoveModeToMax();
+  console.log(rsp);
+
+  rsp = await stepper.enable(); 
+  console.log(rsp);
+
   await stepper.printParams();
 
   const params = { 
-    amplitude: 90.0,
-    period:  1.0,
+    amplitude: 180.0,
+    period:  5.0,
     phase:  90.0,
     offset: 0.0, 
     num_cycle: 2 
@@ -20,10 +28,8 @@ const runStepper = async function()  {
     console.log(data);
   };
 
-
-  const rsp = await stepper.sinusoid(params,null,print_data);
+  rsp = await stepper.sinusoid(params,null,print_data);
   console.log(rsp);
-    
 
 
   //let rsp = null;

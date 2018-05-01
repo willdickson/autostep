@@ -11,11 +11,11 @@ stepper.set_move_mode_to_max()
 stepper.enable()
 
 param = { 
-        'amplitude': 85.0,
-        'period':  0.4,
+        'amplitude': 90.0,
+        'period':  1.0,
         'phase':  90.0,
         'offset': 0.0, 
-        'num_cycle': 10 
+        'num_cycle': 2 
         }
 
 vel = param['amplitude']*(2.0*np.pi/param['period'])
