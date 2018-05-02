@@ -30,10 +30,6 @@ class Autostep {
     });
   }
 
-  on(evt, callback) {
-    this.device.on(evt,callback);
-  }
-
   enable(callback) { 
     const cmd = {command: 'enable'};
     return this._sendCmd(cmd,callback);

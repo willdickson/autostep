@@ -1,10 +1,6 @@
 "use strict";
 
 const SerialPort = require('serialport');
-const parser = new SerialPort.parsers.Readline({
-  delimiter: '\n',
-});
-
 
 class SerialDevice {
 
@@ -14,14 +10,28 @@ class SerialDevice {
     this.cmdQueue = [];
     this.cmdCurrent = null;
     this.serial = new SerialPort(port,options);
-    this.serial.pipe(parser);
     this.streamCallback = null;
   
     if (openCallback && typeof openCallback == 'function') {
       this.serial.on('open', openCallback);
     }
+
     let dataCallback = (data) => {
-      if (!this.cmdCurrent) {
+      if (this.cmdCurrent) {
+        // Handle command response
+        let moreFlag = false;
+        if (this.cmdCurrent.callback) { 
+          moreFlag = this.cmdCurrent.callback(null,data)
+        }
+        if (moreFlag) {
+          this.cmdQueue.unshift({
+            message: null, 
+            callback: this.cmdCurrent.callback
+          });
+        } 
+        this.processQueue();
+      } else {
+        // Handle data stream
         if (this.streamCallback) {
           let dataObj = null;
           let parseErr = null;
@@ -32,20 +42,7 @@ class SerialDevice {
           }
           this.streamCallback(parseErr, dataObj);
         }
-        return;
-      } 
-
-      let moreFlag = false;
-      if (this.cmdCurrent.callback) { 
-        moreFlag = this.cmdCurrent.callback(null,data)
       }
-      if (moreFlag) {
-        this.cmdQueue.unshift({
-          message: null, 
-          callback: this.cmdCurrent.callback
-        });
-      } 
-      this.processQueue();
     }
     this.serial.on('data', dataCallback); 
   }

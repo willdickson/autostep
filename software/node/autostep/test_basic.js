@@ -2,6 +2,7 @@
 
 let Autostep = require('./autostep');
 
+
 const runStepper = async function()  {
 
   const stepper = await Autostep.createNew('/dev/ttyACM0');
@@ -25,12 +26,13 @@ const runStepper = async function()  {
   }
 
   const print_data = (err, data) => {
-    console.log(data);
+    if (data) {
+      console.log(data);
+    } 
   };
 
   rsp = await stepper.sinusoid(params,null,print_data);
   console.log(rsp);
-
 
   //let rsp = null;
   //let step = 360;

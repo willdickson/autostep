@@ -11,8 +11,8 @@ stepper.set_move_mode_to_max()
 stepper.enable()
 
 param = { 
-        'amplitude': 90.0,
-        'period':  1.0,
+        'amplitude': 180.0,
+        'period':  5.0,
         'phase':  90.0,
         'offset': 0.0, 
         'num_cycle': 2 
