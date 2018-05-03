@@ -47,8 +47,8 @@ const overcurrentThreshold = {
   ]
 };
 
-export const configurationOptions = [
-  fullstepPerRevOption,
+export const configOptions = [
+  fullstepsPerRevOption,
   stepModeOption,
   overcurrentThreshold,
 ];

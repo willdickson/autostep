@@ -5,6 +5,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import router from './router'
 import io from 'socket.io-client'
 import App from './App'
+import {store} from './store'
 
 Vue.config.productionTip = false;
 
@@ -12,6 +13,7 @@ Vue.use(BootstrapVue);
 
 new Vue({
   el: '#app',
+  store,
   router,
   components: { App },
   template: '<App/>',
@@ -26,6 +28,7 @@ new Vue({
       // Served by webapp
       socket = io.connect('http://' + document.domain  + ':' + location.port);
     }
+    store.commit('setSocket', socket);
     socket.emit('testMessage', {data:'hello from client'});
   }
 });
