@@ -3,20 +3,20 @@
 
     <div>
       <b-navbar toggleable="md" type="dark" variant="primary"> 
-        <b-navbar-brand> Autostep Controller</b-navbar-brand>
+        <b-navbar-brand> <b> Autostep Controller </b> </b-navbar-brand>
       </b-navbar>
     </div>
 
     <div>
       <b-nav tabs>
         <b-nav-item to="configuration">
-          Configuration
+          <b> Configuration </b>
         </b-nav-item>
         <b-nav-item to="moverun">
-          Move/Run
+          <b> Move/Run </b>
         </b-nav-item>
         <b-nav-item to="sinusoid">
-          Sinusoid
+          <b> Sinusoid </b>
         </b-nav-item>
       </b-nav>
     </div>
