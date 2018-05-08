@@ -6,19 +6,22 @@
 
       <b-row>
          <b-col>
-          <b-form>
+          <b-form  v-on:reset.prevent v-on:submit.prevent>
 
-            <b-form-group v-for="item in configOptions" v-bind:label="item.label" v-bind:key="item.label" class="w-50" horizontal >
-              <b-form-select v-if="item.type=='select'" v-bind:options="item.options" required class="w-50">
-              </b-form-select>
-              <b-form-input v-if="item.type=='number'" required  class="w-50" >
-              </b-form-input>
-            </b-form-group>
-
-            <br>
-            <b-button type="submit" variant="outline-primary"> Set Values </b-button>
+            <b-button v-on:click="onGetValues" variant="outline-primary"> Get Values  </b-button>
             &nbsp;
-            <b-button type="reset"  variant="outline-primary"> Get Values  </b-button>
+            &nbsp;
+            <b-button v-on:click="onSetValues" variant="outline-primary"> Set Values </b-button>
+            <br> <br> <br>
+            <b-form-group v-for="(item,key) in configOptions" v-bind:label="getItemLabel(item)" v-bind:key="item.label" >
+              <b-form-select v-if="item.type==='select'" v-bind:options="item.options" v-model="configValues[key]" required  class="w-25">
+              </b-form-select>
+              <b-form-input v-if="item.type==='number'"  v-model="configValues[key]"  required class="w-25">
+              </b-form-input>
+              <b-form-checkbox v-if="item.type==='checkbox'">
+                {{item.label}}
+              </b-form-checkbox>
+            </b-form-group>
 
           </b-form>
         </b-col>
@@ -37,14 +40,36 @@ export default {
   name: 'Configuration',
   data () {
     return {
-      msg: 'Configuration'
+      msg: 'Configuration',
     }
   },
   computed: {
     ...mapState([
-      'configOptions'
-    ])
-  }
+      'configOptions',
+      'configValues',
+      'configDisabled',
+      ]),
+  },
+  methods: {
+    onGetValues() {
+      console.log('onGetValues');
+      console.log(this.configValues);
+      console.log(JSON.stringify(this.configValues));
+    },
+    onSetValues() {
+      console.log('onSetValues');
+    },
+    getItemLabel(item) {
+      if (item.type === 'checkbox') {
+        return '';
+      } else {
+        return item.label;
+      }
+    },
+    getItemActive(item,key) {
+      return false;
+    }
+  },
 }
 </script>
 

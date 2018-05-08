@@ -1,7 +1,7 @@
 "use strict";
 let _ = require('lodash');
 
-const fullstepsPerRevOption = {
+const fullstepPerRev = {
   label: 'Fullsteps/Revolution',
   type: 'select',
   options: [ 
@@ -11,7 +11,7 @@ const fullstepsPerRevOption = {
   defaultValue: 200,
 }; 
 
-const stepModeOption = {
+const stepMode = {
   label: 'Mircostep Mode',
   type: 'select',
   options: [
@@ -25,30 +25,6 @@ const stepModeOption = {
     {value: 'STEP_FS_128', text: 'STEP_FS_128'}
   ],
   defaultValue: 'STEP_FS_64', 
-};
-
-const overcurrentThreshold = {
-  label: 'Overcurrent Threshold',
-  type: 'select',
-  options: [
-    {value: 'OC_375mA',   text: 'OC_375mA'},  
-    {value: 'OC_750mA',   text: 'OC_750mA'},
-    {value: 'OC_1125mA',  text: 'OC_1125mA'},
-    {value: 'OC_1500mA',  text: 'OC_1500mA'},
-    {value: 'OC_1875mA',  text: 'OC_1875mA'},
-    {value: 'OC_2250mA',  text: 'OC_2250mA'},
-    {value: 'OC_2625mA',  text: 'OC_2625mA'},
-    {value: 'OC_3000mA',  text: 'OC_3000mA'},
-    {value: 'OC_3375mA',  text: 'OC_3375mA'},
-    {value: 'OC_3750mA',  text: 'OC_3750mA'},
-    {value: 'OC_4125mA',  text: 'OC_4125mA'},
-    {value: 'OC_4500mA',  text: 'OC_4500mA'},
-    {value: 'OC_4875mA',  text: 'OC_4875mA'},
-    {value: 'OC_5250mA',  text: 'OC_5250mA'},
-    {value: 'OC_5625mA',  text: 'OC_5625mA'},
-    {value: 'OC_6000mA',  text: 'OC_6000mA'}
-  ],
-  defaultValue: 'OC_3375mA',
 };
 
 const jogModeSpeed = {
@@ -100,6 +76,37 @@ const maxModeDecel = {
   defaultValue: 8000,
 };
 
+const voltCurrOptionsEnable = {
+  label: 'Enable Voltage & Current Options',
+  type: 'checkbox',
+  defaultValue: false,
+};
+
+
+const OCThreshold = {
+  label: 'Overcurrent Threshold',
+  type: 'select',
+  options: [
+    {value: 'OC_375mA',   text: 'OC_375mA'},  
+    {value: 'OC_750mA',   text: 'OC_750mA'},
+    {value: 'OC_1125mA',  text: 'OC_1125mA'},
+    {value: 'OC_1500mA',  text: 'OC_1500mA'},
+    {value: 'OC_1875mA',  text: 'OC_1875mA'},
+    {value: 'OC_2250mA',  text: 'OC_2250mA'},
+    {value: 'OC_2625mA',  text: 'OC_2625mA'},
+    {value: 'OC_3000mA',  text: 'OC_3000mA'},
+    {value: 'OC_3375mA',  text: 'OC_3375mA'},
+    {value: 'OC_3750mA',  text: 'OC_3750mA'},
+    {value: 'OC_4125mA',  text: 'OC_4125mA'},
+    {value: 'OC_4500mA',  text: 'OC_4500mA'},
+    {value: 'OC_4875mA',  text: 'OC_4875mA'},
+    {value: 'OC_5250mA',  text: 'OC_5250mA'},
+    {value: 'OC_5625mA',  text: 'OC_5625mA'},
+    {value: 'OC_6000mA',  text: 'OC_6000mA'}
+  ],
+  defaultValue: 'OC_3375mA',
+};
+
 const kvalOptionValues = _.range(1,256);
 const kvalOptionTexts  = _.map(kvalOptionValues,String);
 const kvalOptions = _.zipObject(kvalOptionValues ,kvalOptionTexts);
@@ -107,42 +114,47 @@ const kvalOptions = _.zipObject(kvalOptionValues ,kvalOptionTexts);
 const kvalRun = {
   label: 'Kval Run',
   type: 'select',
-  options: kvalOptions
+  options: kvalOptions,
+  defaultValue: 41,
 };
 
 const kvalHold = {
   label: 'Kval Hold',
   type: 'select',
-  options: kvalOptions
+  options: kvalOptions,
+  defaultValue: 41,
 };
 
 const kvalAccel = {
   label: 'Kval Accel',
   type: 'select',
-  options: kvalOptions
+  options: kvalOptions,
+  defaultValue: 41,
 };
 
 const kvalDecel = {
   label: 'Kval Decel',
   type: 'select',
-  options: kvalOptions
+  options: kvalOptions,
+  defaultValue: 41,
 };
 
-export const configOptions = [
-  fullstepsPerRevOption,
-  stepModeOption,
-  overcurrentThreshold,
+export const configOptions = {
+  fullstepPerRev,
+  stepMode,
   jogModeSpeed,
   jogModeAccel,
   jogModeDecel,
   maxModeSpeed,
   maxModeAccel,
   maxModeDecel,
+  voltCurrOptionsEnable,
+  OCThreshold,
   kvalAccel,
   kvalDecel,
   kvalRun,
   kvalHold,
-];
+};
 
 
 
