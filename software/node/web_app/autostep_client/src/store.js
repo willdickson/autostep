@@ -25,17 +25,19 @@ export const store = new Vuex.Store({
     },
   },
 
-  //getters: {
-  //  configDisabled: (state, getters) => {
-  //    let disabledValues = {};
-  //    for (let key in state.configValues) {
-  //      if (_.includes(['kvalRun', 'kvalHold', 'kvalAccel', 'kvalDecel'], key)) {
-  //      } else {
-  //      }
-  //    }
-  //    return disabledValues;
-  //  },
-  //},
+  getters: {
+    configDisabled: (state, getters) => {
+      let disabledValues = {};
+      for (let key in state.configValues) {
+        if (_.includes(['OCThreshold', 'kvalRun', 'kvalHold', 'kvalAccel', 'kvalDecel'], key)) {
+          disabledValues[key] = !state.configValues.voltCurrOptionsEnable;
+        } else {
+          disabledValues[key] = false;
+        }
+      }
+      return disabledValues;
+    },
+  },
 
 });
 

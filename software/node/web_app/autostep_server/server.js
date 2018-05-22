@@ -7,6 +7,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const Autostep = require('autostep');
 const _ = require('lodash');
+const jsonPrettyStringify = require('json-stringify-pretty-compact');
 
 // Run parameters
 const serialPortName = '/dev/ttyACM0';
@@ -65,8 +66,26 @@ io.on('connection', function (socket) {
   console.log('* got new connection');
 
   socket.on('testMessage', async function (data) {
-    console.log('got testMessage: ' + JSON.stringify(data));
+    console.log();
+    console.log('testMessage:');
+    console.log(jsonPrettyStringify(data));
+    console.log();
   });
+
+  socket.on('getConfigValuesRequest', async function(data) {
+    console.log();
+    console.log('getConfigValuesRequest:');
+    console.log(jsonPrettyStringify(data));
+    console.log();
+  });
+
+  socket.on('setConfigValuesRequest', async function(data) {
+    console.log();
+    console.log('setConfigValuesRequest:');  
+    console.log(jsonPrettyStringify(data));
+    console.log();
+  });
+
 
 });
 
