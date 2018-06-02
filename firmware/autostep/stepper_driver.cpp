@@ -12,7 +12,7 @@ const int StepperDriver::Default_CS_Pin = 10;
 const int StepperDriver::Default_Reset_Pin = 7;
 const int StepperDriver::Default_Busy_Pin = 8;
 const int StepperDriver::Default_Fullstep_Per_Rev = 200;  
-const byte StepperDriver::Default_Step_Mode = STEP_FS_8;
+const byte StepperDriver::Default_Step_Mode = STEP_FS_64;
 
 
 // Default Movement parameters for jogging (deg/sec and deg/sec^2)
