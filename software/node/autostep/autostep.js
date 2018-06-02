@@ -188,7 +188,7 @@ class Autostep {
 
   setFullstepPerRev(fullstepPerRev,callback) {
     const fullstepPerRevInt = Number(fullstepPerRev.toFixed(0));
-    const cmd = {command: 'set_fullstep_per_rev', fullstep_per_rev: fullStepPerRevInt};
+    const cmd = {command: 'set_fullstep_per_rev', fullstep_per_rev: fullstepPerRevInt};
     return this._sendCmd(cmd, callback);
   }
 
@@ -232,10 +232,30 @@ class Autostep {
     return this._sendCmd(cmd, callback);
   }
 
-  async printParams() {
-    let rsp = null;
+  async setParams(params) {
+    let paramSetters = {
+      'fullstepPerRev' : 'setFullstepPerRev', 
+      'stepMode'       : 'setStepMode', 
+      'threshold'      : 'setOCThreshold',
+      'jogMode'        : 'setJogModeParams', 
+      'maxMode'        : 'setMaxModeParams', 
+      'kval'           : 'setKvalParams',
+    };
 
-    rsp = await this.getFullstepPerRev();
+    for (let paramName in paramSetters) {
+      let paramValue = params[paramName];
+      let setterName = paramSetters[paramName];
+      let setterMethod = this[setterName].bind(this);
+      let rsp = setterMethod(params[paramName]);
+      if (!rsp.success) {
+        return rsp;
+      }
+    } 
+    return {'success': true};
+  }
+
+  async getParams() {
+    let rsp = await this.getFullstepPerRev();
     let fullstepPerRev = rsp['fullstep_per_rev'];
 
     rsp = await this.getStepMode();
@@ -253,13 +273,30 @@ class Autostep {
     let kvalParams = await this.getKvalParams();
     delete kvalParams.success;
 
+    let params = {
+      'fullstepPerRev' : fullstepPerRev,
+      'stepMode' : stepMode,
+      'threshold' : threshold,
+      'jogMode' : jogModeParams,
+      'maxMode' : maxModeParams,
+      'kval': kvalParams,
+      };
+
+    return params;
+
+  }
+
+  async printParams() {
+
+    let params = await this.getParams();
+
     console.log();
     console.log('Autostep params');
     console.log('---------------------------');
     console.log();
-    console.log('fullstep/rev: ' + fullstepPerRev);
-    console.log('step mode:    ' + stepMode);
-    console.log('oc threshold  ' + threshold);
+    console.log('fullstep/rev: ' + params.fullstepPerRev);
+    console.log('step mode:    ' + params.stepMode);
+    console.log('oc threshold  ' + params.threshold);
     console.log();
 
     let printMoveModeParams = (params) =>  {
@@ -270,16 +307,16 @@ class Autostep {
       }
     };
     console.log('jog mode:');
-    printMoveModeParams(jogModeParams);
+    printMoveModeParams(params.jogMode);
     console.log();
 
     console.log('max mode: ');
-    printMoveModeParams(maxModeParams);
+    printMoveModeParams(params.maxMode);
     console.log();
 
     console.log('kvals (0-255)');
-    for (let key in kvalParams) {
-      let value = kvalParams[key];
+    for (let key in params.kval) {
+      let value = params.kval[key];
       console.log('  ' + _.padEnd(key,5) + ': ' + value);
     }
     console.log('---------------------------');

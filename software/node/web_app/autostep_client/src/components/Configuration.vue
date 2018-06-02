@@ -67,7 +67,7 @@ export default {
       //console.log(this.configValues);
       //console.log(JSON.stringify(this.configValues));
       //console.log(JSON.stringify(this.configDisabled));
-      this.socket.emit('getConfigValuesRequest', {});
+      this.socket.emit('getConfigValuesRequest', this.configValues);
     },
     onSetValues() {
       console.log('onSetValues');

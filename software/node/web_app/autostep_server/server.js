@@ -8,6 +8,7 @@ const io = require('socket.io')(server);
 const Autostep = require('autostep');
 const _ = require('lodash');
 const jsonPrettyStringify = require('json-stringify-pretty-compact');
+const {convertParamsAppToDev, convertParamsDevToApp} = require('./param_converter');
 
 // Run parameters
 const serialPortName = '/dev/ttyACM0';
@@ -72,18 +73,45 @@ io.on('connection', function (socket) {
     console.log();
   });
 
-  socket.on('getConfigValuesRequest', async function(data) {
+  socket.on('getConfigValuesRequest', async function(clientParams) {
     console.log();
     console.log('getConfigValuesRequest:');
-    console.log(jsonPrettyStringify(data));
+    console.log('-----------------------'); 
+    
     console.log();
+    console.log('clientParams');
+    console.log(jsonPrettyStringify(clientParams));
+    console.log();
+
+    let deviceParams = await stepper.getParams(); 
+    console.log();
+    console.log('deviceParams');
+    console.log(jsonPrettyStringify(deviceParams));
+    console.log();
+
+    let newClientParams = convertParamsDevToApp(deviceParams);
+    console.log();
+    console.log('newClientParams');
+    console.log(jsonPrettyStringify(newClientParams));
+    console.log();
+    
   });
 
-  socket.on('setConfigValuesRequest', async function(data) {
+  socket.on('setConfigValuesRequest', async function(clientParams) {
     console.log();
     console.log('setConfigValuesRequest:');  
-    console.log(jsonPrettyStringify(data));
+    console.log('-----------------------');
     console.log();
+    console.log('clientParams');
+    console.log(jsonPrettyStringify(clientParams));
+    console.log();
+
+    let deviceParams = convertParamsAppToDev(clientParams);
+    console.log();
+    console.log('deviceParams');
+    console.log(jsonPrettyStringify(deviceParams));
+    console.log();
+
   });
 
 
