@@ -29,6 +29,12 @@ new Vue({
       socket = io.connect('http://' + document.domain  + ':' + location.port);
     }
     store.commit('setSocket', socket);
-    socket.emit('testMessage', {data:'hello from client'});
+    socket.on('getConfigValuesResponse', (data) => {
+      console.log('getConfigValuesResponse');
+      console.log('-----------------------');
+      console.log(JSON.stringify(data));
+      this.$store.commit('setConfigValues',data);
+      console.log('done')
+    });
   }
 });

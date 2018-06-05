@@ -66,51 +66,73 @@ io.on('connection', function (socket) {
 
   console.log('* got new connection');
 
-  socket.on('testMessage', async function (data) {
-    console.log();
-    console.log('testMessage:');
-    console.log(jsonPrettyStringify(data));
-    console.log();
-  });
+  //socket.on('testMessage', async function (data) {
+  //  console.log();
+  //  console.log('testMessage:');
+  //  console.log(jsonPrettyStringify(data));
+  //  console.log();
+  //});
 
   socket.on('getConfigValuesRequest', async function(clientParams) {
-    console.log();
-    console.log('getConfigValuesRequest:');
-    console.log('-----------------------'); 
-    
-    console.log();
-    console.log('clientParams');
-    console.log(jsonPrettyStringify(clientParams));
-    console.log();
 
     let deviceParams = await stepper.getParams(); 
-    console.log();
-    console.log('deviceParams');
-    console.log(jsonPrettyStringify(deviceParams));
-    console.log();
+    let convertedParams = convertParamsDevToApp(deviceParams);
+    let newClientParams = Object.assign(clientParams,convertedParams);
+    io.emit('getConfigValuesResponse', newClientParams);
 
-    let newClientParams = convertParamsDevToApp(deviceParams);
-    console.log();
-    console.log('newClientParams');
-    console.log(jsonPrettyStringify(newClientParams));
-    console.log();
-    
+    if (true) {
+      console.log();
+      console.log('getConfigValuesRequest:');
+      console.log('-----------------------'); 
+
+      console.log();
+      console.log('clientParams');
+      console.log(jsonPrettyStringify(clientParams));
+      console.log();
+      console.log();
+      console.log('deviceParams');
+      console.log(jsonPrettyStringify(deviceParams));
+      console.log();
+
+      console.log();
+      console.log('newClientParams');
+      console.log(jsonPrettyStringify(newClientParams));
+      console.log();
+    }
+
   });
 
   socket.on('setConfigValuesRequest', async function(clientParams) {
-    console.log();
-    console.log('setConfigValuesRequest:');  
-    console.log('-----------------------');
-    console.log();
-    console.log('clientParams');
-    console.log(jsonPrettyStringify(clientParams));
-    console.log();
+    let deviceParamsSet= convertParamsAppToDev(clientParams);
+    let rsp = await stepper.setParams(deviceParamsSet);
+    if (!rsp.success) {
+      console.log(rsp)
+      socket.emit('setConfigValueError', rsp);
+    }
+    let deviceParamsGet = await stepper.getParams();
+    let convertedParams = convertParamsDevToApp(deviceParamsGet);
+    let newClientParams = Object.assign(clientParams,convertedParams);
+    io.emit('getConfigValuesResponse', newClientParams);
 
-    let deviceParams = convertParamsAppToDev(clientParams);
-    console.log();
-    console.log('deviceParams');
-    console.log(jsonPrettyStringify(deviceParams));
-    console.log();
+    if (true) {
+      console.log();
+      console.log('setConfigValuesRequest:');  
+      console.log('-----------------------');
+      console.log();
+      console.log('clientParams');
+      console.log(jsonPrettyStringify(clientParams));
+      console.log();
+
+      console.log();
+      console.log('deviceParamsSet');
+      console.log(jsonPrettyStringify(deviceParamsSet));
+      console.log();
+
+      console.log();
+      console.log('deviceParamsGet');
+      console.log(jsonPrettyStringify(deviceParamsGet));
+      console.log();
+    }
 
   });
 

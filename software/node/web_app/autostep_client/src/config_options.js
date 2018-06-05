@@ -83,7 +83,7 @@ const voltCurrOptionsEnable = {
 };
 
 
-const OCThreshold = {
+const threshold = {
   label: 'Overcurrent Threshold',
   type: 'select',
   options: [
@@ -149,7 +149,7 @@ export const configOptions = {
   maxModeAccel,
   maxModeDecel,
   voltCurrOptionsEnable,
-  OCThreshold,
+  threshold,
   kvalAccel,
   kvalDecel,
   kvalRun,

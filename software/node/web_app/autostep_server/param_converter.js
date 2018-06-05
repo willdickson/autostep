@@ -1,9 +1,7 @@
 "use strict";
 const _ = require('lodash');
-
-
 const SPECIAL_KEYS = ['kval', 'jogMode', 'maxMode'];
-const OMITTED_KEYS = ['voltCurrOptionsEnalbe'];
+const OMITTED_KEYS = ['voltCurrOptionsEnable'];
 
 let containsSubStringFromArray = function(testString,testArray) { 
   let testVal = false;
@@ -26,13 +24,21 @@ let convertParamsAppToDev = function(paramsApp) {
     if (containsSubStringFromArray(key,OMITTED_KEYS)) {
       continue;
     } else if (containsSubStringFromArray(key,SPECIAL_KEYS) ) {
-      console.log(key);
+      let arrayOfTerms = _.split(_.startCase(key),' ');
+      let secondKey = _.lowerCase(arrayOfTerms.pop());
+      let firstKey = _.lowerFirst(arrayOfTerms.join(''));
+      if (paramsDev[firstKey]) {
+        paramsDev[firstKey][secondKey] = paramsApp[key];
+      } else {
+        paramsDev[firstKey] = {[secondKey]: paramsApp[key]}; 
+      }
     } else {
       paramsDev[key] = paramsApp[key];
     }
   }
   return paramsDev;
 };
+
 
 let convertParamsDevToApp = function(paramsDev) {
   let paramsApp = _.omit(paramsDev, ...SPECIAL_KEYS);

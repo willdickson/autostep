@@ -246,9 +246,11 @@ class Autostep {
       let paramValue = params[paramName];
       let setterName = paramSetters[paramName];
       let setterMethod = this[setterName].bind(this);
-      let rsp = setterMethod(params[paramName]);
-      if (!rsp.success) {
-        return rsp;
+      if (params[paramName]) {
+        let rsp = await setterMethod(params[paramName]);
+        if (!rsp.success) {
+          return rsp;
+        }
       }
     } 
     return {'success': true};

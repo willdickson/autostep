@@ -10,6 +10,7 @@ Vue.use(Vuex);
 export const store = new Vuex.Store({
   state: {
     socket: null,
+    configChanged: false,
     configOptions: configOptions,
     configValues: getDefaultValues(configOptions),
   },
@@ -20,16 +21,22 @@ export const store = new Vuex.Store({
       state.socket = socket;
     },
 
+    setConfigChanged(state, value) {
+      state.configChanged = value;
+    },
+
     setConfigValues(state, newConfigValues) {
       state.configValues = newConfigValues;
     },
+
   },
 
   getters: {
+
     configDisabled: (state, getters) => {
       let disabledValues = {};
       for (let key in state.configValues) {
-        if (_.includes(['OCThreshold', 'kvalRun', 'kvalHold', 'kvalAccel', 'kvalDecel'], key)) {
+        if (_.includes(['threshold', 'kvalRun', 'kvalHold', 'kvalAccel', 'kvalDecel'], key)) {
           disabledValues[key] = !state.configValues.voltCurrOptionsEnable;
         } else {
           disabledValues[key] = false;
@@ -37,6 +44,23 @@ export const store = new Vuex.Store({
       }
       return disabledValues;
     },
+
+    configValid: (state, getters) => {
+      let isValid = {};
+      for (let key in state.configValues) {
+        if (state.configOptions[key].type === 'number') {
+          isValid[key] = _.isFinite(Number(state.configValues[key]));
+        } else {
+          isValid[key] = true;
+        }
+      }
+      return isValid;
+    },
+
+    configAllValid: (state, getters) => {
+      return !_.every(getters.configValid);
+    },
+
   },
 
 });
