@@ -112,7 +112,7 @@ io.on('connection', function (socket) {
     let deviceParamsGet = await stepper.getParams();
     let convertedParams = convertParamsDevToApp(deviceParamsGet);
     let newClientParams = Object.assign(clientParams,convertedParams);
-    io.emit('getConfigValuesResponse', newClientParams);
+    io.emit('setConfigValuesResponse', newClientParams);
 
     if (true) {
       console.log();

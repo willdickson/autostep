@@ -36,5 +36,12 @@ new Vue({
       this.$store.commit('setConfigValues',data);
       console.log('done')
     });
+    socket.on('setConfigValuesResponse', (data) => {
+      console.log('getConfigValuesResponse');
+      console.log('-----------------------');
+      console.log(JSON.stringify(data));
+      this.$store.commit('setConfigChanged', false);
+      console.log('done')
+    });
   }
 });

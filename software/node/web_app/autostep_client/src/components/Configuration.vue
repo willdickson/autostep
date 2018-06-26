@@ -33,7 +33,7 @@
 
             <span 
               v-if="configChanged" 
-              class="text-primary"> 
+              class="text-warning"> 
               Parameters Changed! 
             </span>
 
