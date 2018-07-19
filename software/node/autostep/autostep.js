@@ -56,6 +56,11 @@ class Autostep {
     return this._sendCmd(cmd,callback);
   }
 
+  async moveBy(step, callback) {
+    const rsp = await this.getPosition();
+    return this.moveTo(rsp.position + step);
+  }
+
   moveToFullsteps(position, callback) {
     const cmd = {command: 'move_to_fullsteps', position: position};
     return this._sendCmd(cmd,callback);

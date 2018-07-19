@@ -137,6 +137,19 @@ io.on('connection', function (socket) {
   });
 
 
+  socket.on('moveToPosition', async function(moveParams) {
+    console.log('moveToPosition' + JSON.stringify(moveParams));
+    let rsp = await stepper.setMoveModeToJog();
+    rsp = await stepper.moveTo(moveParams.moveValue);
+  });
+
+  socket.on('jogPosition', async function(jogParams) {
+    console.log('jogPosition ' + JSON.stringify(jogParams));
+    let rsp = await stepper.setMoveModeToJog();
+    rsp = await stepper.moveBy(jogParams.jogValue);
+  });
+
+
 });
 
 console.log();

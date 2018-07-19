@@ -13,7 +13,7 @@
           <b> Configuration </b>
         </b-nav-item>
         <b-nav-item to="moverun">
-          <b> Move/Run </b>
+          <b> Move/Jog </b>
         </b-nav-item>
         <b-nav-item to="sinusoid">
           <b> Sinusoid </b>

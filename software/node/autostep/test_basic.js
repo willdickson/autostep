@@ -16,16 +16,19 @@ const runStepper = async function()  {
 
   await stepper.printParams();
 
-  if (false) {
+  if (true) {
     let rsp = null;
 
-    rsp = await stepper.setMoveModeToMax();
+    rsp = await stepper.setMoveModeToJog();
     console.log(rsp);
 
     rsp = await stepper.enable(); 
     console.log(rsp);
 
-    await stepper.printParams();
+    //await stepper.printParams();
+
+    rsp = await stepper.moveBy(100);
+    console.log(rsp)
 
     //const params = { 
     //  amplitude: 180.0,

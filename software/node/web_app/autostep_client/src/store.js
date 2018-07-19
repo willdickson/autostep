@@ -13,6 +13,9 @@ export const store = new Vuex.Store({
     configChanged: false,
     configOptions: configOptions,
     configValues: getDefaultValues(configOptions),
+    driveState: { enabled: true, running: false, position: 0},
+    runJogParams: {jogValue: 10, moveValue: 0},
+
   },
 
   mutations: {
@@ -27,6 +30,14 @@ export const store = new Vuex.Store({
 
     setConfigValues(state, newConfigValues) {
       state.configValues = newConfigValues;
+    },
+
+    setDriveState(state, value) {
+      state.driveState = value;
+    },
+
+    setRunJogParams(state, params) {
+      state.runJogParams = params;
     },
 
   },
