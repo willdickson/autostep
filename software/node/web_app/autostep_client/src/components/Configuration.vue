@@ -43,37 +43,37 @@
               v-for="(item,key) in configOptions" 
               v-bind:label="getItemLabel(item)" 
               v-bind:key="item.label">
-
+              
               <b-form-select 
                 v-if="item.type==='select'" 
-                v-model="configValues[key]" 
+                v-bind:value="configValues[key]"
                 v-bind:options="item.options" 
                 v-bind:disabled="configDisabled[key]" 
-                v-on:change="onConfigChange"
+                v-on:change="updateStoreObject($event,'configValues',key)"
                 required  
                 class="w-25">
               </b-form-select>
 
               <b-form-input 
                 v-if="item.type==='number'"  
-                v-model="configValues[key]"  
+                type="number"
+                v-bind:value="configValues[key]"
                 v-bind:state="configValid[key]" 
-                v-on:change="onConfigChange"
+                v-on:change="updateStoreObject(Number($event),'configValues',key)"
                 required 
                 class="w-25">
               </b-form-input>
 
               <b-form-checkbox 
                 v-if="item.type==='checkbox'" 
-                v-model="configValues[key]" 
-                v-on:change="onCheckboxChange(key)">
+                v-bind:checked="configValues[key]"
+                v-on:change="updateStoreObject($event,'configValues', key)">
                 {{item.label}} 
                 <span 
                   v-if="configValues[key]" 
                   class="text-danger"> 
                   - warning could damage drive! 
                 </span>
-
               </b-form-checkbox>
 
             </b-form-group>
@@ -120,6 +120,7 @@ export default {
       console.log('onGetValues');
       console.log(this.configAllValid);
       this.socket.emit('getConfigValuesRequest', this.configValues);
+      this.$store.commit('setConfigChanged', false);
     },
 
     onSetValues() {
@@ -135,6 +136,19 @@ export default {
         }
       }
       this.socket.emit('setConfigValuesRequest', configValuesToSend);
+      this.$store.commit('setConfigChanged', false);
+    },
+
+    updateStoreObject(value,objectName,propertyName) { 
+      this.$store.commit('setObjectProperty',{value,objectName,propertyName});
+      if (objectName === 'configValues' )
+      {
+        if (propertyName !== 'voltCurrOptionsEnable')
+        {
+          this.onConfigChange();
+        }
+      }
+      console.log(JSON.stringify(this[objectName]))
     },
 
     onConfigChange() {
@@ -153,7 +167,7 @@ export default {
         return item.label;
       }
     },
-
+    
     getItemActive(item,key) {
       return false;
     }

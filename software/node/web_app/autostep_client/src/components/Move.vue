@@ -1,11 +1,14 @@
 <template>
-  <div class="moverun"> 
+  <div class="move"> 
+
     <br>
+
     <b-container fluid>
+
       <b-row>
          <b-col>
 
-           <h4 class="font-weight-bold">  Current Position: &nbsp {{driveState['position']}} &deg </h4> 
+           <h4 class="font-weight-bold">  Current Position: &nbsp {{Math.round(driveState['position'])}} &deg </h4> 
 
            <br>
            <br>
@@ -35,18 +38,35 @@
              v-on:reset.prevent 
              v-on:submit.prevent
              >
+
              <b-form-group size="lg">
-               <b-form-checkbox v-model="driveState['enabled']" v-on:input="onEnabled">
+               <b-form-checkbox 
+                 v-bind:checked="driveState.enabled"
+                 v-on:input="onEnabled">
                  Drive Enabled
               </b-form-checkbox>
              </b-form-group>
 
              <br>
 
+             <b-form-group size="lg">
+               <b-form-checkbox 
+                 v-bind:checked="positionTimerEnabled"
+                 v-on:input="onPositionTimerEnabled">
+                 Position Timer
+              </b-form-checkbox>
+             </b-form-group>
+
+             <br>
 
              <b-form-group label="Move To Position" >
               <b-input-group prepend="&deg" class="w-25">
-                <b-form-input type="number" v-model="runJogParams['moveValue']"> </b-form-input>
+                <b-form-input 
+                  type="number" 
+                  v-bind:value="runJogParams.moveValue" 
+                  v-on:input="updateStoreObject(Number($event), 'runJogParams', 'moveValue')"
+                  > 
+                </b-form-input>
                 <b-input-group-append>
                   <b-btn variant="outline-primary" v-on:click="onMove"> Go </b-btn>
                 </b-input-group-append>
@@ -57,18 +77,20 @@
 
              <b-form-group label="Jog Position" >
               <b-input-group prepend="&deg" class="w-25">
-                <b-form-input type="number" v-model="runJogParams['jogValue']"> </b-form-input>
+                <b-form-input 
+                  type="number" 
+                  v-bind:value="runJogParams.jogValue"
+                  v-on:input="updateStoreObject(Number($event), 'runJogParams', 'jogValue')"
+                  > 
+                </b-form-input>
                 <b-input-group-append>
-                  <b-btn variant="outline-primary" v-on:click="onJog"> Go </b-btn>
+                  <b-btn variant="outline-primary" v-on:click="onJog(-runJogParams.jogValue)"> - </b-btn>
+                  <b-btn variant="outline-primary" v-on:click="onJog(runJogParams.jogValue)"> + </b-btn>
                 </b-input-group-append>
               </b-input-group>
              </b-form-group>
 
-
              <br>
-
-
-
 
            </b-form>
 
@@ -85,28 +107,35 @@ import {mapState} from 'vuex';
 import {mapGetters} from 'vuex';
 
 export default {
-  name: 'MoveRun',
+
+  name: 'Move',
+
   data () {
     return {
-      enabled: "true",
     }
   },
+
   computed: {
     ...mapState([
       'socket',
       'configValues',
       'driveState',
       'runJogParams',
+      'positionTimerEnabled',
       ]),
     ...mapGetters([
     ]),
   },
+
   methods: {
     onDebug() {
       console.log('onDebug ' + this.driveState['enabled']);
+      console.log(JSON.stringify(this.configValues))
+      this.socket.emit('getPosition',{});
     }, 
     onZero() {
       console.log('onZero');
+      this.socket.emit('setPosition', {value: 0});
     },
     onHome() {
       console.log('onHome');
@@ -117,15 +146,27 @@ export default {
       console.log(moveParams);
       this.socket.emit('moveToPosition', moveParams);
     },
-    onJog() {
+    onJog(value) {
       console.log('onJog ' + this.runJogParams['jogValue']);
-      const jogParams = {jogValue: Number(this.runJogParams['jogValue'])};
+      const jogParams = {jogValue: value};
       this.socket.emit('jogPosition', jogParams);
     },
-    onEnabled() {
-      console.log('onEnabled ' + this.driveState['enabled']);
+    onEnabled(value) {
+      console.log('onEnabled ' + value);
+      this.updateStoreObject(value,'driveState','enabled');
+
+    },
+    onPositionTimerEnabled(value) {
+      console.log('onEnabled ' + value);
+      this.$store.commit('setPositionTimerEnabled', value);
+      console.log(JSON.stringify(this.positionTimerEnabled));
+    },
+    updateStoreObject(value,objectName,propertyName) { 
+      this.$store.commit('setObjectProperty',{value,objectName,propertyName});
+      console.log(JSON.stringify(this[objectName]))
     },
   },
+
 }
 </script>
 

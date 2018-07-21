@@ -372,6 +372,7 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
 void SystemState::hard_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
     stepper_driver_.hard_stop();
+    trajectory_ptr_ -> set_status(Trajectory::Done);
     json_rsp["success"] = true;
 }
 
@@ -379,6 +380,7 @@ void SystemState::hard_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
 void SystemState::soft_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
     stepper_driver_.soft_stop();
+    trajectory_ptr_ -> set_status(Trajectory::Done);
     json_rsp["success"] = true;
 }
 

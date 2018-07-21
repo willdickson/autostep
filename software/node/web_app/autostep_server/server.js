@@ -18,6 +18,10 @@ const clientDistDir = path.join(__dirname, '../autostep_client/dist');
 const staticFileDir = path.join(clientDistDir, 'static');
 
 
+// Position timer parameters
+let positionTimerEnabled = false;
+
+
 // Setup Autostep stepper
 // --------------------------------------------------------------------------------------
 
@@ -148,6 +152,49 @@ io.on('connection', function (socket) {
     let rsp = await stepper.setMoveModeToJog();
     rsp = await stepper.moveBy(jogParams.jogValue);
   });
+
+  socket.on('getPosition', async function(data) {
+    console.log('getPosition ' + data);
+    let rsp = await stepper.getPosition();
+    io.emit('getPositionResponse', {position: rsp.position});
+  });
+
+  socket.on('setPosition', async function(data) {
+    console.log('setPosition ' + data);
+    let rsp = await stepper.setPosition(data.value);
+  });
+
+  socket.on('setPositionTimerEnabled', function(data) {
+    if (data.value) {
+      positionTimerEnabled = true;
+    } else {
+      positionTimerEnabled = false;
+    }
+  });
+
+  socket.on('runSinusoid', async function(data) {
+    console.log('runSinusoid  ' + JSON.stringify(data));
+    let rsp = await stepper.setMoveModeToMax();
+    let streamCb = (err, data) => { 
+      //console.log(JSON.stringify(data)); 
+      io.emit('trajectoryData', data);
+    };
+
+    rsp = await stepper.sinusoid(data,null, streamCb);
+  });
+
+  socket.on('stopMotion', async function(data) {
+    console.log('stopMotion');
+    let rsp = await stepper.softStop();
+    io.emit('stopMotionResponse', rsp);
+  });
+
+  setInterval(async function() {
+    if (positionTimerEnabled) {
+      let rsp = await stepper.getPosition();
+      io.emit('getPositionResponse', {position: rsp.position});
+    }
+  }, 100);
 
 
 });

@@ -6,6 +6,7 @@ import router from './router'
 import io from 'socket.io-client'
 import App from './App'
 import {store} from './store'
+import {mapState} from 'vuex';
 
 Vue.config.productionTip = false;
 
@@ -17,6 +18,12 @@ new Vue({
   router,
   components: { App },
   template: '<App/>',
+  computed: {
+    ...mapState([
+      'configValues',
+      'positionTimerEnabled',
+      ]),
+  },
   mounted: function() {
 
     // Setup socket
@@ -43,5 +50,40 @@ new Vue({
       this.$store.commit('setConfigChanged', false);
       console.log('done')
     });
+    socket.on('getPositionResponse', (data) => {
+      console.log('getPositionResponse');
+      console.log('-----------------------');
+      console.log(JSON.stringify(data));
+      let value = data.position;
+      let payload = {value: data.position, objectName: 'driveState', propertyName: 'position'};
+      this.$store.commit('setObjectProperty',payload);
+    });
+    let resetAfterTrajectory = () => {
+        this.$store.commit('setPositionTimerEnabled', true);
+        this.$store.commit('setObjectProperty', {
+          objectName: 'navbarDisabled', 
+          propertyName: 'configuration', 
+          value: false 
+        });
+        this.$store.commit('setObjectProperty', {
+          objectName: 'navbarDisabled', 
+          propertyName: 'move', 
+          value: false 
+        });
+    };
+    socket.on('stopMotionResponse', (data) => {
+      console.log('stopMotionResponse');
+      resetAfterTrajectory();
+    });
+    socket.on('trajectoryData', (data) => {
+      console.log(JSON.stringify(data));
+      if ((data === null) || (data === {})) {
+        console.log('reset');
+        resetAfterTrajectory();
+      }
+    });
+    socket.emit('getConfigValuesRequest', this.configValues);
+    this.$store.commit('setPositionTimerEnabled', this.positionTimerEnabled);
+    //socket.emit('setPositionTimerEnabled', {value: this.positionTimerEnabled});
   }
 });

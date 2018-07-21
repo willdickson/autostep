@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Configuration from '@/components/Configuration'
-import MoveRun from '@/components/MoveRun'
+import MoveRun from '@/components/Move'
 import Sinusoid from '@/components/Sinusoid'
 
 Vue.use(Router);
@@ -18,8 +18,8 @@ export default new Router({
     component: Configuration
   },
   {
-    path: '/moverun',
-    name: 'MoveRun',
+    path: '/move',
+    name: 'Move',
     component: MoveRun
   },
   {

@@ -8,6 +8,7 @@ let _ = require('lodash');
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
+  //strict: true,
   state: {
     socket: null,
     configChanged: false,
@@ -15,7 +16,9 @@ export const store = new Vuex.Store({
     configValues: getDefaultValues(configOptions),
     driveState: { enabled: true, running: false, position: 0},
     runJogParams: {jogValue: 10, moveValue: 0},
-
+    sinusoidParams: {amplitude: 30, period: 2.5, phase: 90.0, offset: 0.0, num_cycle: 1}, 
+    positionTimerEnabled: true,
+    navbarDisabled: {configuration: false, move: false, sinusoid: false},
   },
 
   mutations: {
@@ -38,6 +41,17 @@ export const store = new Vuex.Store({
 
     setRunJogParams(state, params) {
       state.runJogParams = params;
+      console.log('setRunJogParams');
+    },
+
+    setObjectProperty(state, payload)
+    {
+      state[payload['objectName']][payload['propertyName']] = payload['value'];
+    },
+
+    setPositionTimerEnabled(state,value) {
+      state.positionTimerEnabled = value;
+      state.socket.emit('setPositionTimerEnabled', {value: value});
     },
 
   },

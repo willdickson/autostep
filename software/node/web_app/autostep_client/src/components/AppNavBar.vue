@@ -9,13 +9,13 @@
 
     <div>
       <b-nav tabs>
-        <b-nav-item to="configuration">
+        <b-nav-item to="configuration" v-bind:disabled="navbarDisabled.configuration">
           <b> Configuration </b>
         </b-nav-item>
-        <b-nav-item to="moverun">
+        <b-nav-item to="move" v-bind:disabled="navbarDisabled.move">
           <b> Move/Jog </b>
         </b-nav-item>
-        <b-nav-item to="sinusoid">
+        <b-nav-item to="sinusoid" v-bind:disabled="navbarDisabled.sinusoid">
           <b> Sinusoid </b>
         </b-nav-item>
       </b-nav>
@@ -25,13 +25,20 @@
 </template>
 
 <script>
+
+import {mapState} from 'vuex';
+
 export default {
   name: 'AppNavBar',
   data () {
     return {
     }
-  }
+  },
+  computed: {
+    ...mapState(['navbarDisabled']),
+  },
 }
+
 </script>
 
 <style scoped>
