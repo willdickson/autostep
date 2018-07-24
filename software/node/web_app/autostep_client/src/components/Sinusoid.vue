@@ -6,6 +6,7 @@
       <b-row>
          <b-col>
 
+
            <br> 
 
            <b-button variant="outline-primary" style="width:80px;" v-on:click="onRun"> 
@@ -18,10 +19,23 @@
              Stop
            </b-button>
 
-           <br> 
-           <br> 
-           <br> 
+           &nbsp; &nbsp;
 
+           <b-button variant="outline-primary" style="width:80px;" v-on:click="onDebug"> 
+            Debug 
+           </b-button>
+
+           &nbsp; &nbsp;
+
+           <b-button variant="outline-primary" style="width:80px;" v-on:click="onDisplay"> 
+             Display
+           </b-button>
+
+           <div ref="positionPlot"> </div>
+
+           <br> 
+           <br> 
+           <br> 
 
            <b-form  
              v-on:reset.prevent 
@@ -87,6 +101,8 @@
              </b-form-group>
 
            </b-form>
+           
+
          </b-col>
        </b-row>
     </b-container>
@@ -105,11 +121,20 @@ export default {
 
   data () {
     return {
-      dummyAmplitude: 100.0,
-      dummyPeriod: 1.0,
-      dummyPhase: 90.0,
-      dummyOffset: 0.0,
-      dummyNumberOfCycles: 1,
+      positionPlotLayout: { 
+        xaxis: { 
+          title: 'time (sec)', 
+          zeroline: true, 
+        }, 
+        yaxis: { 
+          title: 'position (deg)', 
+          zeroline: true,
+        },
+        width: 1200,
+        height: 500,
+      },
+      haveDataPlot: false,
+      
     }
   },
 
@@ -118,9 +143,35 @@ export default {
       'socket',
       'driveState',
       'sinusoidParams',
+      'positionData',
       ]),
     ...mapGetters([
     ]),
+    lengthPositionData() {
+
+      return this.positionData.t.length;
+    },
+  },
+
+  watch: {
+    lengthPositionData(newLength, oldLength) {
+      let xNew = this.positionData.t.slice(oldLength, newLength); 
+      let yNew = this.positionData.p.slice(oldLength, newLength); 
+      if (this.haveDataPlot) { 
+        console.log('extend');
+        Plotly.extendTraces(this.$refs.positionPlot,{x: [xNew], y: [yNew]},[1]); 
+      } else { 
+        let plotData = { 
+          x: xNew, 
+          y: yNew, 
+          mode: 'lines', 
+          visible: true,
+        }; 
+        console.log('create');
+        Plotly.plot(this.$refs.positionPlot, [plotData], this.positionPlotLayout); 
+        this.haveDataPlot = true;
+      }
+    },
   },
 
   methods: {
@@ -141,6 +192,10 @@ export default {
         value: true
       });
 
+      this.clearPlot();
+      this.haveDataPlot = false;
+      this.addSinusoidPlot();
+
       this.socket.emit('runSinusoid', this.sinusoidParams);
     },
 
@@ -152,7 +207,69 @@ export default {
     updateStoreObject(value,objectName,propertyName) { 
       this.$store.commit('setObjectProperty',{value,objectName,propertyName});
       console.log(JSON.stringify(this[objectName]))
+      this.clearPlot();
+      this.addSinusoidPlot();
     },
+
+    clearPlot() {
+      console.log(this.$refs.positionPlot.data.length);
+      console.log(JSON.stringify(this.$refs.positionPlot.data));
+      let num = this.$refs.positionPlot.data.length;
+      for (let i=0; i<num; i++) {
+        Plotly.deleteTraces(this.$refs.positionPlot, 0);
+        console.log('--');
+        console.log(this.$refs.positionPlot.data.length);
+        console.log(JSON.stringify(this.$refs.positionPlot.data));
+        console.log('**');
+      }
+    },
+
+    onDebug() {
+      this.clearPlot();
+    },
+
+    onDisplay() {
+      console.log(this.$refs.positionPlot.data.length);
+      console.log(JSON.stringify(this.$refs.positionPlot.data));
+    },
+
+    addSinusoidPlot() {
+      const amplitude = this.sinusoidParams['amplitude'];
+      const period = this.sinusoidParams['period'];
+      const phase = this.sinusoidParams['phase'];
+      const phaseRad = phase*Math.PI/180.0;
+      const offset = this.sinusoidParams['offset'];
+      const numCycle = this.sinusoidParams['num_cycle'];
+
+      const ptsPerCycle = 100;
+      const numPts = ptsPerCycle*numCycle;
+      const tStop = period*numCycle;
+
+      let dt = tStop/numPts;
+      let tValues = []
+      let pValues = [];
+      for (let i=0; i<numPts; i++)
+      {
+        let t = i*dt;
+        let p = amplitude*Math.sin(2.0*Math.PI*t/period + phaseRad) + offset;
+        tValues.push(t);
+        pValues.push(p);
+      }
+
+      let positionPlotData = {
+        x: tValues, 
+        y: pValues, 
+        mode: 'lines', 
+        visible: true,
+      };
+
+      Plotly.plot(this.$refs.positionPlot, [positionPlotData], this.positionPlotLayout);
+    },
+
+  },
+
+  mounted() {
+    this.addSinusoidPlot();
   },
 
 }

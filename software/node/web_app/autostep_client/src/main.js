@@ -7,6 +7,7 @@ import io from 'socket.io-client'
 import App from './App'
 import {store} from './store'
 import {mapState} from 'vuex';
+import _ from 'lodash';
 
 Vue.config.productionTip = false;
 
@@ -77,9 +78,11 @@ new Vue({
     });
     socket.on('trajectoryData', (data) => {
       console.log(JSON.stringify(data));
-      if ((data === null) || (data === {})) {
+      if ((data === null) || _.isEmpty(data) ) {
         console.log('reset');
         resetAfterTrajectory();
+      } else {
+        this.$store.commit('updatePositionData',{t: data.t, p: data.p});
       }
     });
     socket.emit('getConfigValuesRequest', this.configValues);

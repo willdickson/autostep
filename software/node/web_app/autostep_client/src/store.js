@@ -19,6 +19,7 @@ export const store = new Vuex.Store({
     sinusoidParams: {amplitude: 30, period: 2.5, phase: 90.0, offset: 0.0, num_cycle: 1}, 
     positionTimerEnabled: true,
     navbarDisabled: {configuration: false, move: false, sinusoid: false},
+    positionData: {t:[], p:[]},
   },
 
   mutations: {
@@ -44,14 +45,32 @@ export const store = new Vuex.Store({
       console.log('setRunJogParams');
     },
 
-    setObjectProperty(state, payload)
-    {
-      state[payload['objectName']][payload['propertyName']] = payload['value'];
-    },
-
     setPositionTimerEnabled(state,value) {
       state.positionTimerEnabled = value;
       state.socket.emit('setPositionTimerEnabled', {value: value});
+      //state.socket.emit('setPositionTimerEnabled', {value: false});
+    },
+
+    setNavbarDisabled(state, data) {
+      state.navbarDisabled = data;
+    },
+
+    setPositionData(state, data) {
+      state.positionData = data;
+    },
+
+    updatePositionData(state, payload) {
+      state.positionData.t.push(payload.t);
+      state.positionData.p.push(payload.p);
+    },
+
+    clearPositionData(state) {
+      state.positionData = {t:[], p:[]};
+    },
+
+    setObjectProperty(state, payload)
+    {
+      state[payload['objectName']][payload['propertyName']] = payload['value'];
     },
 
   },
