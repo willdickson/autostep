@@ -10,6 +10,14 @@ Includes includes methods for:
 * basic motor positioning, e.g,  motion point-to-point moves, run at fixed velocity, etc. 
 * running sinusoidal trajectories, 
 
+## Web App
+
+![screenshot_1](images/webapp_screenshot_1.png)
+
+![screenshot_1](images/webapp_screenshot_2.png)
+
+![screenshot_1](images/webapp_screenshot_3.png)
+
 ## Firmware
 
 * Location: "firmware/autostep" sub-directory
@@ -30,7 +38,17 @@ python setup.py install
 
 ## Javascript (Node.js) Library Installation
 
-* Location: "software/javascript/autostep"
+* Location: "software/node/autostep"
+
+### Installation
+
+```bash
+npm install
+```
+
+## Javascript Web App server 
+
+* Location: "software/node/web_app/autostep_server"
 
 ### Installation
 
@@ -39,6 +57,15 @@ npm install
 ```
 
 
+## Javascript Web App server 
+
+* Location: "software/node/web_app/autostep_client"
+
+### Installation
+
+```bash
+npm install
+```
 
 
 
