@@ -49,6 +49,7 @@
 
              <br>
 
+             <!--
              <b-form-group size="lg">
                <b-form-checkbox 
                  v-bind:checked="positionTimerEnabled"
@@ -56,6 +57,7 @@
                  Position Timer
               </b-form-checkbox>
              </b-form-group>
+             -->
 
              <br>
 
@@ -129,41 +131,34 @@ export default {
 
   methods: {
     onDebug() {
-      console.log('onDebug ' + this.driveState['enabled']);
-      console.log(JSON.stringify(this.configValues))
       this.socket.emit('getPosition',{});
     }, 
     onZero() {
-      console.log('onZero');
       this.socket.emit('setPosition', {value: 0});
     },
     onHome() {
-      console.log('onHome');
     },
     onMove() {
-      console.log('onMove ' + this.runJogParams['moveValue']);
       const moveParams = {moveValue: Number(this.runJogParams['moveValue'])};
-      console.log(moveParams);
       this.socket.emit('moveToPosition', moveParams);
     },
     onJog(value) {
-      console.log('onJog ' + this.runJogParams['jogValue']);
       const jogParams = {jogValue: value};
       this.socket.emit('jogPosition', jogParams);
     },
     onEnabled(value) {
-      console.log('onEnabled ' + value);
       this.updateStoreObject(value,'driveState','enabled');
-
+      if (value) {
+        this.socket.emit('enableDrive', {});
+      } else {
+        this.socket.emit('releaseDrive', {});
+      }
     },
     onPositionTimerEnabled(value) {
-      console.log('onEnabled ' + value);
       this.$store.commit('setPositionTimerEnabled', value);
-      console.log(JSON.stringify(this.positionTimerEnabled));
     },
     updateStoreObject(value,objectName,propertyName) { 
       this.$store.commit('setObjectProperty',{value,objectName,propertyName});
-      console.log(JSON.stringify(this[objectName]))
     },
   },
 

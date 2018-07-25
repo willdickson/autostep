@@ -16,15 +16,15 @@ const byte StepperDriver::Default_Step_Mode = STEP_FS_64;
 
 
 // Default Movement parameters for jogging (deg/sec and deg/sec^2)
-const float StepperDriver::Default_Jog_Speed = 200.0;
-const float StepperDriver::Default_Jog_Acceleration = 100.0;
-const float StepperDriver::Default_Jog_Deceleration = 100.0;
+const float StepperDriver::Default_Jog_Speed = 400.0;
+const float StepperDriver::Default_Jog_Acceleration = 800.0;
+const float StepperDriver::Default_Jog_Deceleration = 800.0;
 
 
 // Default Movement parameters max values (deg/sec and deg/sec^2)
 const float StepperDriver::Default_Max_Speed = 4000.0;
-const float StepperDriver::Default_Max_Acceleration = 4000.0;
-const float StepperDriver::Default_Max_Deceleration = 4000.0;
+const float StepperDriver::Default_Max_Acceleration = 80000.0;
+const float StepperDriver::Default_Max_Deceleration = 80000.0;
 
 // Micro to full step transistion (deg/sec)
 const float StepperDriver::Default_Full_Speed = 500.0;        

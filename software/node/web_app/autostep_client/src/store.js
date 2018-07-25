@@ -105,6 +105,20 @@ export const store = new Vuex.Store({
       return !_.every(getters.configValid);
     },
 
+    maxVelocity: (state, getters) => {
+      const amplitude = state.sinusoidParams['amplitude'];
+      const period = state.sinusoidParams['period'];
+      const maxVel = (2.0*Math.PI/period)*amplitude;
+      return maxVel;
+    },
+
+    maxAcceleration: (state, getters) => {
+      const amplitude = state.sinusoidParams['amplitude'];
+      const period = state.sinusoidParams['period'];
+      const maxAcc = Math.pow((2.0*Math.PI/period),2)*amplitude;
+      return maxAcc;
+    }
+
   },
 
 });

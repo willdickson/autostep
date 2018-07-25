@@ -117,14 +117,11 @@ export default {
   methods: {
 
     onGetValues() {
-      console.log('onGetValues');
-      console.log(this.configAllValid);
       this.socket.emit('getConfigValuesRequest', this.configValues);
       this.$store.commit('setConfigChanged', false);
     },
 
     onSetValues() {
-      console.log('onSetValues');
       let configValuesToSend = {};
       for (let key in this.configValues) {
         if (!this.configDisabled[key]) {
@@ -148,7 +145,6 @@ export default {
           this.onConfigChange();
         }
       }
-      console.log(JSON.stringify(this[objectName]))
     },
 
     onConfigChange() {

@@ -11,7 +11,8 @@ const jsonPrettyStringify = require('json-stringify-pretty-compact');
 const {convertParamsAppToDev, convertParamsDevToApp} = require('./param_converter');
 
 // Run parameters
-const serialPortName = '/dev/ttyACM0';
+//const serialPortName = '/dev/ttyACM0';
+const serialPortName = process.argv[2];
 const networkPort = 5000;
 
 const clientDistDir = path.join(__dirname, '../autostep_client/dist');
@@ -20,6 +21,8 @@ const staticFileDir = path.join(clientDistDir, 'static');
 
 // Position timer parameters
 let positionTimerEnabled = false;
+
+console.log('serialPortName: ' + serialPortName);
 
 
 // Setup Autostep stepper
@@ -84,7 +87,7 @@ io.on('connection', function (socket) {
     let newClientParams = Object.assign(clientParams,convertedParams);
     io.emit('getConfigValuesResponse', newClientParams);
 
-    if (true) {
+    if (false) {
       console.log();
       console.log('getConfigValuesRequest:');
       console.log('-----------------------'); 
@@ -110,7 +113,6 @@ io.on('connection', function (socket) {
     let deviceParamsSet= convertParamsAppToDev(clientParams);
     let rsp = await stepper.setParams(deviceParamsSet);
     if (!rsp.success) {
-      console.log(rsp)
       socket.emit('setConfigValueError', rsp);
     }
     let deviceParamsGet = await stepper.getParams();
@@ -118,7 +120,7 @@ io.on('connection', function (socket) {
     let newClientParams = Object.assign(clientParams,convertedParams);
     io.emit('setConfigValuesResponse', newClientParams);
 
-    if (true) {
+    if (false) {
       console.log();
       console.log('setConfigValuesRequest:');  
       console.log('-----------------------');
@@ -140,27 +142,30 @@ io.on('connection', function (socket) {
 
   });
 
+  socket.on('enableDrive', async function(data) {
+    let rsp = await stepper.enable();
+  });
+
+  socket.on('releaseDrive', async function(data) {
+    let rsp = await stepper.release();
+  });
 
   socket.on('moveToPosition', async function(moveParams) {
-    console.log('moveToPosition' + JSON.stringify(moveParams));
     let rsp = await stepper.setMoveModeToJog();
     rsp = await stepper.moveTo(moveParams.moveValue);
   });
 
   socket.on('jogPosition', async function(jogParams) {
-    console.log('jogPosition ' + JSON.stringify(jogParams));
     let rsp = await stepper.setMoveModeToJog();
     rsp = await stepper.moveBy(jogParams.jogValue);
   });
 
   socket.on('getPosition', async function(data) {
-    console.log('getPosition ' + data);
     let rsp = await stepper.getPosition();
     io.emit('getPositionResponse', {position: rsp.position});
   });
 
   socket.on('setPosition', async function(data) {
-    console.log('setPosition ' + data);
     let rsp = await stepper.setPosition(data.value);
   });
 
@@ -173,10 +178,8 @@ io.on('connection', function (socket) {
   });
 
   socket.on('runSinusoid', async function(data) {
-    console.log('runSinusoid  ' + JSON.stringify(data));
     let rsp = await stepper.setMoveModeToMax();
     let streamCb = (err, data) => { 
-      //console.log(JSON.stringify(data)); 
       io.emit('trajectoryData', data);
     };
 
@@ -184,7 +187,6 @@ io.on('connection', function (socket) {
   });
 
   socket.on('stopMotion', async function(data) {
-    console.log('stopMotion');
     let rsp = await stepper.softStop();
     io.emit('stopMotionResponse', rsp);
   });

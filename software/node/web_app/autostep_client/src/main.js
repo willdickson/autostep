@@ -38,23 +38,12 @@ new Vue({
     }
     store.commit('setSocket', socket);
     socket.on('getConfigValuesResponse', (data) => {
-      console.log('getConfigValuesResponse');
-      console.log('-----------------------');
-      console.log(JSON.stringify(data));
       this.$store.commit('setConfigValues',data);
-      console.log('done')
     });
     socket.on('setConfigValuesResponse', (data) => {
-      console.log('getConfigValuesResponse');
-      console.log('-----------------------');
-      console.log(JSON.stringify(data));
       this.$store.commit('setConfigChanged', false);
-      console.log('done')
     });
     socket.on('getPositionResponse', (data) => {
-      console.log('getPositionResponse');
-      console.log('-----------------------');
-      console.log(JSON.stringify(data));
       let value = data.position;
       let payload = {value: data.position, objectName: 'driveState', propertyName: 'position'};
       this.$store.commit('setObjectProperty',payload);
@@ -73,20 +62,18 @@ new Vue({
         });
     };
     socket.on('stopMotionResponse', (data) => {
-      console.log('stopMotionResponse');
       resetAfterTrajectory();
     });
     socket.on('trajectoryData', (data) => {
-      console.log(JSON.stringify(data));
       if ((data === null) || _.isEmpty(data) ) {
-        console.log('reset');
         resetAfterTrajectory();
       } else {
         this.$store.commit('updatePositionData',{t: data.t, p: data.p});
       }
     });
+    socket.emit('enableDrive', {});
     socket.emit('getConfigValuesRequest', this.configValues);
     this.$store.commit('setPositionTimerEnabled', this.positionTimerEnabled);
-    //socket.emit('setPositionTimerEnabled', {value: this.positionTimerEnabled});
+    socket.emit('setPositionTimerEnabled', {value: this.positionTimerEnabled});
   }
 });

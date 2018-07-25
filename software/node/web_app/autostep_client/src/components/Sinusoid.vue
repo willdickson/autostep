@@ -21,21 +21,26 @@
 
            &nbsp; &nbsp;
 
+
+           <b-button variant="outline-primary" style="width:100px;" v-on:click="onClear"> 
+             Clear Plot
+           </b-button>
+
+           &nbsp; &nbsp;
+
            <b-button variant="outline-primary" style="width:80px;" v-on:click="onDebug"> 
             Debug 
            </b-button>
 
            &nbsp; &nbsp;
 
-           <b-button variant="outline-primary" style="width:80px;" v-on:click="onDisplay"> 
-             Display
-           </b-button>
+           <br>
+           <br>
+
+           Max Velocity (&deg/s): {{maxVelocity.toFixed(0)}} &nbsp; &nbsp; Max Acceleration (&deg/s<sup>2</sup>): {{maxAcceleration.toFixed(0)}}
 
            <div ref="positionPlot"> </div>
 
-           <br> 
-           <br> 
-           <br> 
 
            <b-form  
              v-on:reset.prevent 
@@ -132,9 +137,9 @@ export default {
         },
         width: 1200,
         height: 500,
+        showlegend: false,
       },
-      haveDataPlot: false,
-      
+      haveDataTrace: false,
     }
   },
 
@@ -146,9 +151,10 @@ export default {
       'positionData',
       ]),
     ...mapGetters([
+      'maxVelocity',
+      'maxAcceleration',
     ]),
     lengthPositionData() {
-
       return this.positionData.t.length;
     },
   },
@@ -157,8 +163,7 @@ export default {
     lengthPositionData(newLength, oldLength) {
       let xNew = this.positionData.t.slice(oldLength, newLength); 
       let yNew = this.positionData.p.slice(oldLength, newLength); 
-      if (this.haveDataPlot) { 
-        console.log('extend');
+      if (this.haveDataTrace) { 
         Plotly.extendTraces(this.$refs.positionPlot,{x: [xNew], y: [yNew]},[1]); 
       } else { 
         let plotData = { 
@@ -167,9 +172,8 @@ export default {
           mode: 'lines', 
           visible: true,
         }; 
-        console.log('create');
         Plotly.plot(this.$refs.positionPlot, [plotData], this.positionPlotLayout); 
-        this.haveDataPlot = true;
+        this.haveDataTrace = true;
       }
     },
   },
@@ -177,7 +181,6 @@ export default {
   methods: {
 
     onRun() {
-      console.log('onRun ' + JSON.stringify(this.sinusoidParams));
       this.$store.commit('setPositionTimerEnabled', false);
 
       this.$store.commit('setObjectProperty', {
@@ -192,45 +195,46 @@ export default {
         value: true
       });
 
-      this.clearPlot();
-      this.haveDataPlot = false;
+      this.deleteAllTraces();
       this.addSinusoidPlot();
-
+      this.haveDataTrace = false;
       this.socket.emit('runSinusoid', this.sinusoidParams);
     },
 
     onStop() {
-      console.log('onStop');
       this.socket.emit('stopMotion', {});
     },
 
     updateStoreObject(value,objectName,propertyName) { 
       this.$store.commit('setObjectProperty',{value,objectName,propertyName});
-      console.log(JSON.stringify(this[objectName]))
-      this.clearPlot();
+      this.deleteAllTraces();
       this.addSinusoidPlot();
     },
 
-    clearPlot() {
-      console.log(this.$refs.positionPlot.data.length);
-      console.log(JSON.stringify(this.$refs.positionPlot.data));
+    deleteAllTraces() {
       let num = this.$refs.positionPlot.data.length;
       for (let i=0; i<num; i++) {
         Plotly.deleteTraces(this.$refs.positionPlot, 0);
-        console.log('--');
-        console.log(this.$refs.positionPlot.data.length);
-        console.log(JSON.stringify(this.$refs.positionPlot.data));
-        console.log('**');
       }
     },
 
     onDebug() {
-      this.clearPlot();
+      const amplitude = this.sinusoidParams['amplitude'];
+      const period = this.sinusoidParams['period'];
+      const phase = this.sinusoidParams['phase'];
+      const phaseRad = phase*Math.PI/180.0;
+      const offset = this.sinusoidParams['offset'];
+      const numCycle = this.sinusoidParams['num_cycle'];
+
+      const maxVel = (2.0*Math.PI/period)*amplitude;
+      const maxAcc = Math.pow((2.0*Math.PI/period),2)*amplitude;
+      console.log('maxVel: ' + maxVel);
+      console.log('maxAcc: ' + maxAcc);
     },
 
-    onDisplay() {
-      console.log(this.$refs.positionPlot.data.length);
-      console.log(JSON.stringify(this.$refs.positionPlot.data));
+    onClear() {
+      this.deleteAllTraces();
+      this.addSinusoidPlot();
     },
 
     addSinusoidPlot() {
