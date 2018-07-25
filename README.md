@@ -12,11 +12,16 @@ Includes includes methods for:
 
 ## Web App
 
+### Configuration
 ![screenshot_1](images/webapp_screenshot_1.png)
 
+### Move and Jog
 ![screenshot_1](images/webapp_screenshot_2.png)
 
+### Sinusiodal Trajectories
 ![screenshot_1](images/webapp_screenshot_3.png)
+
+<br>
 
 ## Firmware
 
