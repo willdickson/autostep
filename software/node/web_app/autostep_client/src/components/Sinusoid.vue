@@ -35,7 +35,6 @@
            &nbsp; &nbsp;
 
            <br>
-           <br>
 
            Max Velocity (&deg/s): {{maxVelocity.toFixed(0)}} &nbsp; &nbsp; Max Acceleration (&deg/s<sup>2</sup>): {{maxAcceleration.toFixed(0)}}
 

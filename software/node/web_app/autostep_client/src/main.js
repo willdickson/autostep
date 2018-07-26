@@ -31,10 +31,11 @@ new Vue({
     let socket = null;
     if (location.port === '8080') {
       // Using the development server
-      socket = io.connect('http://localhost:5000');
+      //socket = io.connect('http://localhost:5000');
+      socket = io('http://localhost:5000',{transports:['websocket']});
     } else {
       // Served by webapp
-      socket = io.connect('http://' + document.domain  + ':' + location.port);
+      socket = io.connect('http://' + document.domain  + ':' + location.port, {transports:['websocket']});
     }
     store.commit('setSocket', socket);
     socket.on('getConfigValuesResponse', (data) => {
