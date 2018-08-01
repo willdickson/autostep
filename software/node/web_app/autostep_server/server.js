@@ -11,7 +11,6 @@ const jsonPrettyStringify = require('json-stringify-pretty-compact');
 const {convertParamsAppToDev, convertParamsDevToApp} = require('./param_converter');
 
 // Run parameters
-//const serialPortName = '/dev/ttyACM0';
 const serialPortName = process.argv[2];
 const networkPort = 5000;
 
