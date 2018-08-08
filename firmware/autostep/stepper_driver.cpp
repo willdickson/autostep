@@ -14,12 +14,17 @@ const int StepperDriver::Default_Busy_Pin = 8;
 const int StepperDriver::Default_Fullstep_Per_Rev = 200;  
 const byte StepperDriver::Default_Step_Mode = STEP_FS_64;
 
+// Default current and kval parameters
+const byte StepperDriver::Default_Kval_Acceleration = 50;
+const byte StepperDriver::Default_Kval_Deceleration = 50;
+const byte StepperDriver::Default_Kval_Run = 50;
+const byte StepperDriver::Default_Kval_Hold = 50;
+const String StepperDriver::Default_OC_Threshold = String("OC_3375mA");
 
 // Default Movement parameters for jogging (deg/sec and deg/sec^2)
 const float StepperDriver::Default_Jog_Speed = 400.0;
 const float StepperDriver::Default_Jog_Acceleration = 800.0;
 const float StepperDriver::Default_Jog_Deceleration = 800.0;
-
 
 // Default Movement parameters max values (deg/sec and deg/sec^2)
 const float StepperDriver::Default_Max_Speed = 4000.0;
@@ -100,6 +105,12 @@ void StepperDriver::initialize()
     driver_ptr_->setFullSpeed(400.0);
     set_step_mode(Default_Step_Mode);
     set_movement_params_to_jog();
+
+    set_acceleration_kval(Default_Kval_Acceleration);
+    set_deceleration_kval(Default_Kval_Deceleration);
+    set_run_kval(Default_Kval_Run);
+    set_hold_kval(Default_Kval_Hold);
+    set_oc_threshold(Default_OC_Threshold);
 
 }
 

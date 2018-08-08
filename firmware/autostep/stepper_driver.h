@@ -16,6 +16,13 @@ class StepperDriver
         static const int Default_Fullstep_Per_Rev;
         static const byte Default_Step_Mode;
 
+        // Default current and kval parameters
+        static const byte Default_Kval_Acceleration;
+        static const byte Default_Kval_Deceleration;
+        static const byte Default_Kval_Run;
+        static const byte Default_Kval_Hold;
+        static const String Default_OC_Threshold;
+
         // Default Movement parameters for jogging
         static const float Default_Jog_Speed;         // (deg/sec)
         static const float Default_Jog_Acceleration;  // (deg/sec^2)

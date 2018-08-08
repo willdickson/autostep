@@ -18,6 +18,7 @@ class Autostep(serial.Serial):
     BusyWaitSleepDt = 0.05
     DefaultTimeout = 10.0
     DefaultResetSleep = 0.0
+    DefaultGearRatio = 1.0
     AutosetPositionStartAngle = 5.0
 
     StepModeList = [
@@ -67,7 +68,14 @@ class Autostep(serial.Serial):
         while self.inWaiting() > 0:
             val = self.read()
         self.sensor_cal = None
+        self.gear_ratio = self.DefaultGearRatio
 
+
+    def set_gear_ratio(self,gear_ratio):
+        """
+        Set the gear ratio - can be used to adjust for geared load.
+        """
+        self.gear_ratio = gear_ratio
 
     def enable(self):
         """
@@ -91,7 +99,8 @@ class Autostep(serial.Serial):
         Run motor and given velocity (deg/sec). Motor will run at this velocity until 
         given another command (e.g. soft_stop, etc.)
         """
-        cmd_dict = {'command': 'run', 'velocity': velocity}
+        velocity_adj = velocity*self.gear_ratio
+        cmd_dict = {'command': 'run', 'velocity': velocity_adj}
         self.send_cmd(cmd_dict)
 
 
@@ -99,10 +108,14 @@ class Autostep(serial.Serial):
         """
         Run sinusoidal trajectory with given amplitude, period, phase, offest and number of cycles.
         """
+        param_adj = dict(param)
+        param_adj['amplitude'] = param_adj['amplitude']*self.gear_ratio
+        param_adj['offset'] = param_adj['offset']*self.gear_ratio
+
         cmd_dict = {'command': 'sinusoid'};
         sinusoid_keys = ['amplitude', 'period', 'phase', 'offset', 'num_cycle']
         for key in sinusoid_keys:
-            cmd_dict[key] = param[key]
+            cmd_dict[key] = param_adj[key]
         rsp_dict = self.send_cmd(cmd_dict)
 
         data_list = []
@@ -115,13 +128,22 @@ class Autostep(serial.Serial):
             else:
                 break
         return data_list
-        
+
+
+    def move_to_sinusoid_start(self, param):
+        """
+        Move to sinusoid start position
+        """
+        phase_rad = np.deg2rad(param['phase'])
+        angle = param['amplitude']*np.sin(0 + phase_rad) + param['offset'] 
+        self.move_to(angle)
 
     def move_to(self,position):
         """
         Move motor to specified position (deg). Motor will run until it reaches this position.
         """
-        cmd_dict = {'command': 'move_to', 'position': position}
+        position_adj = position*self.gear_ratio
+        cmd_dict = {'command': 'move_to', 'position': position_adj}
         self.send_cmd(cmd_dict)
 
 
@@ -196,7 +218,8 @@ class Autostep(serial.Serial):
         """
         cmd_dict = {'command': 'get_position'}
         rsp_dict = self.send_cmd(cmd_dict)
-        return rsp_dict['position']
+        position_adj = rsp_dict['position']/self.gear_ratio
+        return position_adj 
 
     
     def set_position(self, position):
@@ -204,7 +227,8 @@ class Autostep(serial.Serial):
         Set the current motor position (deg). Note, not a motion command - just assigns 
         the current position of the motor to the given position.
         """
-        cmd_dict = {'command': 'set_position', 'position': position}
+        position_adj = position*self.gear_ratio
+        cmd_dict = {'command': 'set_position', 'position': position_adj}
         self.send_cmd(cmd_dict)
 
 
