@@ -6,6 +6,7 @@ let SerialDevice = require('./serialdevice');
 const BAUDRATE = 115200;
 const BUSYWAIT_TIMEOUT_MS = 10;
 const AUTOSET_POSITION_START_ANGLE = 5.0; 
+const DEFAULT_GEAR_RATIO = 1.0;
 const MOVE_MODE_UNITS = { 
   speed: '(deg/sec)', 
   accel: '(deg/sec**2)', 
@@ -20,6 +21,8 @@ class Autostep {
   constructor(port, openCallback) {
     const options = {baudRate: BAUDRATE};
     this.device = new SerialDevice(port,options,openCallback);
+    this.gearRatio = DEFAULT_GEAR_RATIO;
+    this.sinusoidRunning = false;
   }
 
   static createNew(port) {
@@ -28,6 +31,10 @@ class Autostep {
         resolve(newAutostep);
       });
     });
+  }
+
+  setGearRatio(gearRatio) {
+    this.gearRatio = gearRatio;
   }
 
   enable(callback) { 
@@ -40,25 +47,54 @@ class Autostep {
     return this._sendCmd(cmd,callback);
   }
 
-  run(velocity, callback) {
-    const cmd = {command: 'run', velocity: velocity};
+  async run(velocity, callback) {
+    const velocityAdj = this.gearRatio*velocity;
+    const cmd = {command: 'run', velocity: velocityAdj};
     return this._sendCmd(cmd,callback);
   }
 
-  sinusoid(params,cmdCallback,streamCallback) {
-    const cmd = {command: 'sinusoid', ...params};
-    this.device.setStreamCallback(streamCallback);
-    return this._sendCmd(cmd,cmdCallback);
+  async sinusoid(params,cmdCallback,streamCallback) {
+    // Adjust parameters for gear ratio
+    const paramsAdj = _.cloneDeep(params);
+    paramsAdj.amplitude = paramsAdj.amplitude*this.gearRatio;
+    paramsAdj.offset = paramsAdj.offset*this.gearRatio;
+
+    // Send command to driver
+    const cmd = {command: 'sinusoid', ...paramsAdj};
+    let streamCallbackWrapped = (err,data) => {
+      if (err || _.isEmpty(data)) {
+        this.sinusoidRunning = false;
+      }
+      if (streamCallback) { 
+        streamCallback(err,data);
+      }
+    }
+    this.device.setStreamCallback(streamCallbackWrapped);
+    this.sinusoidRunning = true;
+    const rsp = await this._sendCmd(cmd,cmdCallback);
+
+    // Adjust response for gear ratio
+    let rspAdj = _.cloneDeep(rsp);
+    rspAdj.amplitude = rspAdj.amplitude/this.gearRatio;
+    rspAdj.offset = rspAdj.offset/this.gearRatio;
+    return rspAdj;
+  }
+
+  moveToSinusoidStart(params,callback) {
+    const phaseInRadian = degreeToRadian(params.phase);
+    const startAngle = params.amplitude*Math.sin(phaseInRadian) + params.offset;
+    return this.moveTo(startAngle,callback);
   }
 
   moveTo(position, callback) {
-    const cmd = {command: 'move_to', position: position};
+    const positionAdj = position*this.gearRatio;
+    const cmd = {command: 'move_to', position: positionAdj};
     return this._sendCmd(cmd,callback);
   }
 
   async moveBy(step, callback) {
     const rsp = await this.getPosition();
-    return this.moveTo(rsp.position + step);
+    return this.moveTo(rsp.position + step, callback);
   }
 
   moveToFullsteps(position, callback) {
@@ -91,12 +127,17 @@ class Autostep {
       let done = false;
       while (!done) {
         await timeout(BUSYWAIT_TIMEOUT_MS);
-        console.log(done)
-        let rsp = await this.isBusy();
-        if (rsp.success) {
-          done = !rsp['is_busy']
+        if (this.sinusoidRunning) {
+          if (!this.sinusoidRunning) {
+            done = true;
+          }
         } else {
-          done = true;
+          let rsp = await this.isBusy();
+          if (rsp.success) {
+            done = !rsp['is_busy']
+          } else {
+            done = true;
+          }
         }
       }
       resolve();
@@ -120,13 +161,17 @@ class Autostep {
     return this._sendCmd(cmd,callback);
   }
 
-  getPosition(callback) {
+  async getPosition(callback) {
     const cmd = {command: 'get_position'};
-    return this._sendCmd(cmd,callback);
+    const rsp = await this._sendCmd(cmd,callback);
+    let rspAdj = _.cloneDeep(rsp);
+    rspAdj.position = rspAdj.position/this.gearRatio;
+    return rspAdj;
   }
 
   setPosition(position,callback) {
-    const cmd = {command: 'set_position', position: position};
+    const positionAdj = position*this.gearRatio;
+    const cmd = {command: 'set_position', position: positionAdj};
     return this._sendCmd(cmd,callback);
   }
 
@@ -331,6 +376,11 @@ class Autostep {
   }
 
 
+  sleep(sec) {
+    return timeout(sec*1000.0);
+  }
+
+
   // ------------------------------------------------------------------------------------
 
   _sendCmd(cmd, callback) {
@@ -356,6 +406,15 @@ class Autostep {
     }
     return promise;
   }
+}
+
+let degreeToRadian = function(x) {
+  return (x*Math.PI)/180.0;
+
+}
+
+let radianToDegree = function(x) {
+  return (x*180.0)/Math.PI;
 }
 
 module.exports = Autostep;

@@ -6,6 +6,7 @@ let Autostep = require('./autostep');
 const runStepper = async function()  {
 
   const stepper = await Autostep.createNew('/dev/ttyACM0');
+  stepper.setGearRatio(2.0);
 
   //let params = await stepper.getParams();
   //console.log(params);
@@ -25,27 +26,37 @@ const runStepper = async function()  {
     rsp = await stepper.enable(); 
     console.log(rsp);
 
-    //await stepper.printParams();
+    await stepper.printParams();
 
-    rsp = await stepper.moveBy(100);
+    rsp = await stepper.moveTo(0);
     console.log(rsp)
+    await stepper.busyWait();
+    await stepper.sleep(1.0);
 
-    //const params = { 
-    //  amplitude: 180.0,
-    //  period:  5.0,
-    //  phase:  90.0,
-    //  offset: 0.0, 
-    //  num_cycle: 2 
-    //}
+    const params = { 
+      amplitude: 180.0,
+      period:  5.0,
+      phase:  90.0,
+      offset: 0.0, 
+      num_cycle: 1 
+    }
 
-    //const print_data = (err, data) => {
-    //  if (data) {
-    //    console.log(data);
-    //  } 
-    //};
+    rsp = await stepper.moveToSinusoidStart(params);
+    console.log(rsp);
+    await stepper.busyWait();
+    await stepper.sleep(1.0);
 
-    //rsp = await stepper.sinusoid(params,null,print_data);
-    //console.log(rsp);
+    rsp = await stepper.sinusoid(params,null,(err,data)=> {});
+    console.log(rsp);
+    await stepper.busyWait()
+    await stepper.sleep(1.0);
+
+    rsp = await stepper.setMoveModeToJog();
+    rsp = await stepper.moveTo(0);
+    console.log(rsp)
+    await stepper.busyWait();
+
+
   }
 
   //let rsp = null;
