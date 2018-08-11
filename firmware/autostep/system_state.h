@@ -73,6 +73,7 @@ class SystemState
         void move_to_microsteps_command(JsonObject &json_msg, JsonObject &json_rsp);
 
         void run_command(JsonObject &json_msg, JsonObject &json_rsp);
+        void run_with_feedback_command(JsonObject &json_msg, JsonObject &json_rsp);
         void sinusoid_command(JsonObject &json_msg, JsonObject &json_rsp);
 
         void get_position_command(JsonObject &json_msg, JsonObject &json_rsp);

@@ -265,6 +265,10 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
     {
         run_command(json_msg, json_rsp);
     }
+    else if (command.equals("run_with_feedback"))
+    {
+        run_with_feedback_command(json_msg, json_rsp);
+    }
     else if (command.equals("sinusoid"))
     {
         sinusoid_command(json_msg, json_rsp);
@@ -455,6 +459,22 @@ void SystemState::run_command(JsonObject &json_msg, JsonObject &json_rsp)
     }
 }
 
+void SystemState::run_with_feedback_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("velocity"))
+    {
+        float position = stepper_driver_.get_position();
+        float velocity = json_msg["velocity"];
+        stepper_driver_.run(velocity);
+        json_rsp["success"] = true;
+        json_rsp["position"] = position;
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing velocity";
+    }
+}
 
 void SystemState::sinusoid_command(JsonObject &json_msg, JsonObject &json_rsp)
 { 

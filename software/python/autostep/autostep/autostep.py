@@ -20,6 +20,7 @@ class Autostep(serial.Serial):
     DefaultResetSleep = 0.0
     DefaultGearRatio = 1.0
     AutosetPositionStartAngle = 5.0
+    TrajectoryGain = 20.0
 
     StepModeList = [
             'STEP_FS', 
@@ -102,6 +103,72 @@ class Autostep(serial.Serial):
         velocity_adj = velocity*self.gear_ratio
         cmd_dict = {'command': 'run', 'velocity': velocity_adj}
         self.send_cmd(cmd_dict)
+
+
+    def run_with_feedback(self,velocity):
+        """
+        Run motor and given velocity (deg/sec). Motor will run at this velocity until 
+        given another command (e.g. soft_stop, etc.)
+        """
+        velocity_adj = velocity*self.gear_ratio
+        cmd_dict = {'command': 'run_with_feedback', 'velocity': velocity_adj}
+        rsp = self.send_cmd(cmd_dict)
+        return rsp['position']/self.gear_ratio
+
+
+    def run_trajectory(self, t_done, position_func, velocity_func, disp=False):
+        """
+        Run trajectory given by position and velocity_functions
+        """
+
+        pos_init = position_func(0)
+        vel_init = velocity_func(0)
+
+        self.move_to(pos_init)
+        self.busy_wait()
+        
+        self.set_move_mode_to_max()
+        self.run(vel_init)
+
+        pos_curr = pos_init 
+        vel_curr = vel_init
+
+        t_list = []
+        pos_list = []
+        pos_setpt_list = []
+
+        t_start = time.time()
+        t_last = t_start
+        done = False
+
+        while not done:
+            t = time.time() - t_start
+            dt = t - t_last
+            pos_next = position_func(t)
+            vel_next = velocity_func(t)
+
+            pos_pred = pos_curr + vel_curr*dt
+            error = pos_next - pos_pred
+            vel_curr = vel_next + self.TrajectoryGain*error
+            pos_curr = self.run_with_feedback(vel_curr)
+
+            t_list.append(t)
+            pos_list.append(pos_pred)
+            pos_setpt_list.append(pos_next)
+
+            time.sleep(0.005)
+
+            t_last = t
+            if t > t_done:
+                done = True
+
+            print('{:1.2f}, {:1.2f}, {:1.2f}'.format(t, pos_next, pos_pred))
+
+        self.set_move_mode_to_jog()
+        self.run(0.0)
+
+        return  np.array(t_list), np.array(pos_list), np.array(pos_setpt_list) 
+
 
 
     def sinusoid(self, param): 
