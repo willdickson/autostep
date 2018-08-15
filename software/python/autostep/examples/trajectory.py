@@ -5,7 +5,7 @@ import numpy
 import matplotlib.pyplot as plt
 
 period = 12.0
-num_cycle = 1
+num_cycle = 10
 t_done = num_cycle*period
 amp_list = [100.0,-90,-40, 30, 20]
 
