@@ -5,6 +5,7 @@ import json
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import threading
 
 
 class Autostep(serial.Serial):
@@ -21,6 +22,7 @@ class Autostep(serial.Serial):
     DefaultGearRatio = 1.0
     AutosetPositionStartAngle = 5.0
     TrajectoryGain = 20.0
+    TrajectoryDt = 0.005
 
     StepModeList = [
             'STEP_FS', 
@@ -66,8 +68,11 @@ class Autostep(serial.Serial):
         super(Autostep,self).__init__(port,**params)
         time.sleep(reset_sleep)
         atexit.register(self.atexit_cleanup)
+        self.lock = threading.Lock()
+        self.lock.acquire()
         while self.inWaiting() > 0:
             val = self.read()
+        self.lock.release()
         self.sensor_cal = None
         self.gear_ratio = self.DefaultGearRatio
 
@@ -116,7 +121,7 @@ class Autostep(serial.Serial):
         return rsp['position']/self.gear_ratio
 
 
-    def run_trajectory(self, t_done, position_func, velocity_func, disp=False):
+    def run_trajectory(self, t_done, position_func, velocity_func, disp=False, callback=None):
         """
         Run trajectory given by position and velocity_functions
         """
@@ -124,6 +129,7 @@ class Autostep(serial.Serial):
         pos_init = position_func(0)
         vel_init = velocity_func(0)
 
+        self.set_move_mode_to_jog()
         self.move_to(pos_init)
         self.busy_wait()
         
@@ -152,26 +158,29 @@ class Autostep(serial.Serial):
             vel_curr = vel_next + self.TrajectoryGain*error
             pos_curr = self.run_with_feedback(vel_curr)
 
-            t_list.append(t)
-            pos_list.append(pos_pred)
-            pos_setpt_list.append(pos_next)
-
-            time.sleep(0.005)
+            if callback is None:
+                t_list.append(t)
+                pos_list.append(pos_pred)
+                pos_setpt_list.append(pos_next)
+            else:
+                callback(t,pos_pred,pos_next)
+            time.sleep(self.TrajectoryDt)
 
             t_last = t
             if t > t_done:
                 done = True
 
-            print('{:1.2f}, {:1.2f}, {:1.2f}'.format(t, pos_next, pos_pred))
+            if disp:
+                print('{:1.2f}, {:1.2f}, {:1.2f}'.format(t, pos_next, pos_pred))
 
         self.set_move_mode_to_jog()
         self.run(0.0)
 
-        return  np.array(t_list), np.array(pos_list), np.array(pos_setpt_list) 
+        if callback is None:
+            return  np.array(t_list), np.array(pos_list), np.array(pos_setpt_list) 
 
 
-
-    def sinusoid(self, param): 
+    def sinusoid(self, param, callback=None): 
         """
         Run sinusoidal trajectory with given amplitude, period, phase, offest and number of cycles.
         """
@@ -187,14 +196,27 @@ class Autostep(serial.Serial):
 
         data_list = []
         while True:
+            self.lock.acquire()
             dat_json = self.readline()
+            self.lock.release()
             dat_json = dat_json.strip()
             dat_dict = json.loads(dat_json.decode())
-            if dat_dict:
-                data_list.append([dat_dict['t'], dat_dict['p'], dat_dict['s'], dat_dict['m']])
+            if callback is None:
+                if dat_dict:
+                    data_list.append([dat_dict['t'], dat_dict['p'], dat_dict['s'], dat_dict['m']])
+                else:
+                    break
             else:
-                break
-        return data_list
+                if dat_dict:
+                    elapsed_time = dat_dict['t']
+                    position = dat_dict['p']
+                    setpoint = dat_dict['s']
+                    sensor = dat_dict['m']
+                    callback(elapsed_time, position, setpoint, sensor)
+                else:
+                    break
+        if callback is None:
+            return data_list
 
 
     def move_to_sinusoid_start(self, param):
@@ -378,8 +400,10 @@ class Autostep(serial.Serial):
 
         """
         cmd_json = json.dumps(cmd_dict) + '\n'
+        self.lock.acquire()
         self.write(cmd_json.encode())
         msg_json = self.readline()
+        self.lock.release()
         msg_json = msg_json.strip()
         msg_dict = json.loads(msg_json.decode())
         if not msg_dict['success']==True:
@@ -638,6 +662,27 @@ class Autostep(serial.Serial):
         for k,v in kval_params.iteritems():
             print('  {0:<6} {1}'.format(k+':',v))
         print()
+
+
+    def get_params(self):
+        """
+        Returns dictionary of driver parameters
+        """
+        fullstep_per_rev = self.get_fullstep_per_rev()
+        step_mode = self.get_step_mode()
+        oc_threshold = self.get_oc_threshold()
+        jog_mode_params = self.get_jog_mode_params()
+        max_mode_params = self.get_max_mode_params()
+        kval_params = self.get_kval_params()
+        params = {
+                'fullstep_per_rev': fullstep_per_rev,
+                'step_mode': step_mode,
+                'oc_threshold': oc_threshold, 
+                'jog_mode_params': jog_mode_params,
+                'max_mode_params': max_mode_params,
+                'kval_params': kval_params
+                }
+        return params
 
 
     def atexit_cleanup(self):
