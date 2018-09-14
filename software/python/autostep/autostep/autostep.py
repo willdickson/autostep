@@ -121,7 +121,7 @@ class Autostep(serial.Serial):
         return rsp['position']/self.gear_ratio
 
 
-    def run_trajectory(self, t_done, position_func, velocity_func, disp=False, callback=None):
+    def run_trajectory(self, t_done, position_func, velocity_func, disp=False, on_data_callback=None, on_done_callback=None):
         """
         Run trajectory given by position and velocity_functions
         """
@@ -158,12 +158,12 @@ class Autostep(serial.Serial):
             vel_curr = vel_next + self.TrajectoryGain*error
             pos_curr = self.run_with_feedback(vel_curr)
 
-            if callback is None:
+            if on_data_callback is None:
                 t_list.append(t)
                 pos_list.append(pos_pred)
                 pos_setpt_list.append(pos_next)
             else:
-                callback(t,pos_pred,pos_next)
+                on_data_callback(t,pos_pred,pos_next)
             time.sleep(self.TrajectoryDt)
 
             t_last = t
@@ -176,11 +176,14 @@ class Autostep(serial.Serial):
         self.set_move_mode_to_jog()
         self.run(0.0)
 
-        if callback is None:
+        if on_done_callback is not None:
+            on_done_callback()
+
+        if on_data_callback is None:
             return  np.array(t_list), np.array(pos_list), np.array(pos_setpt_list) 
 
 
-    def sinusoid(self, param, callback=None): 
+    def sinusoid(self, param, on_data_callback=None, on_done_callback=None): 
         """
         Run sinusoidal trajectory with given amplitude, period, phase, offest and number of cycles.
         """
@@ -201,7 +204,7 @@ class Autostep(serial.Serial):
             self.lock.release()
             dat_json = dat_json.strip()
             dat_dict = json.loads(dat_json.decode())
-            if callback is None:
+            if on_data_callback is None:
                 if dat_dict:
                     data_list.append([dat_dict['t'], dat_dict['p'], dat_dict['s'], dat_dict['m']])
                 else:
@@ -212,10 +215,14 @@ class Autostep(serial.Serial):
                     position = dat_dict['p']
                     setpoint = dat_dict['s']
                     sensor = dat_dict['m']
-                    callback(elapsed_time, position, setpoint, sensor)
+                    on_data_callback(elapsed_time, position, setpoint, sensor)
                 else:
                     break
-        if callback is None:
+
+        if on_done_callback is not None:
+            on_done_callback()
+
+        if on_data_callback is None:
             return data_list
 
 
