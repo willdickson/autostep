@@ -145,13 +145,16 @@ class Autostep(serial.Serial):
 
         t_start = time.time()
         t_last = t_start
-        done = False
 
-        while not done:
+        while True:
             t = time.time() - t_start
+            if t > t_done:
+                break
+
             dt = t - t_last
             pos_next = position_func(t)
             vel_next = velocity_func(t)
+            t_last = t
 
             pos_pred = pos_curr + vel_curr*dt
             error = pos_next - pos_pred
@@ -165,10 +168,6 @@ class Autostep(serial.Serial):
             else:
                 on_data_callback(t,pos_pred,pos_next)
             time.sleep(self.TrajectoryDt)
-
-            t_last = t
-            if t > t_done:
-                done = True
 
             if disp:
                 print('{:1.2f}, {:1.2f}, {:1.2f}'.format(t, pos_next, pos_pred))
