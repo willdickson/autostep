@@ -69,10 +69,9 @@ class Autostep(serial.Serial):
         time.sleep(reset_sleep)
         atexit.register(self.atexit_cleanup)
         self.lock = threading.Lock()
-        self.lock.acquire()
-        while self.inWaiting() > 0:
-            val = self.read()
-        self.lock.release()
+        with self.lock:
+            while self.inWaiting() > 0:
+                val = self.read()
         self.sensor_cal = None
         self.gear_ratio = self.DefaultGearRatio
 
@@ -198,9 +197,8 @@ class Autostep(serial.Serial):
 
         data_list = []
         while True:
-            self.lock.acquire()
-            dat_json = self.readline()
-            self.lock.release()
+            with self.lock:
+                dat_json = self.readline()
             dat_json = dat_json.strip()
             dat_dict = json.loads(dat_json.decode())
             if on_data_callback is None:
@@ -241,6 +239,12 @@ class Autostep(serial.Serial):
         cmd_dict = {'command': 'move_to', 'position': position_adj}
         self.send_cmd(cmd_dict)
 
+    def move_by(self,step):
+        """
+        Move motor by specified value (deg). Motor will run until it reaches this position.
+        """
+        position = self.get_position()
+        self.move_to(position+step)
 
     def move_to_fullsteps(self, position):
         """
@@ -406,10 +410,9 @@ class Autostep(serial.Serial):
 
         """
         cmd_json = json.dumps(cmd_dict) + '\n'
-        self.lock.acquire()
-        self.write(cmd_json.encode())
-        msg_json = self.readline()
-        self.lock.release()
+        with self.lock:
+            self.write(cmd_json.encode())
+            msg_json = self.readline()
         msg_json = msg_json.strip()
         msg_dict = json.loads(msg_json.decode())
         if not msg_dict['success']==True:

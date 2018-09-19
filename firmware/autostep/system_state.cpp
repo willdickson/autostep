@@ -195,10 +195,13 @@ void SystemState::update_on_serial_event()
 void SystemState::start_trajectory()
 {
     time_sec_ = 0.0;
-    trajectory_ptr_ -> set_status(Trajectory::Setup);
-    stepper_driver_.set_movement_params_to_jog();
-    stepper_driver_.move_to(trajectory_ptr_ -> position(time_sec_));
-    interval_timer_.begin(timer_callback_, Timer_Period);
+    if (trajectory_ptr_ != nullptr)
+    {
+        trajectory_ptr_ -> set_status(Trajectory::Setup);
+        stepper_driver_.set_movement_params_to_jog();
+        stepper_driver_.move_to(trajectory_ptr_ -> position(time_sec_));
+        interval_timer_.begin(timer_callback_, Timer_Period);
+    }
 }
 
 
@@ -376,7 +379,10 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
 void SystemState::hard_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
     stepper_driver_.hard_stop();
-    trajectory_ptr_ -> set_status(Trajectory::Done);
+    if (trajectory_ptr_ != nullptr)
+    {
+        trajectory_ptr_ -> set_status(Trajectory::Done);
+    }
     json_rsp["success"] = true;
 }
 
@@ -384,7 +390,10 @@ void SystemState::hard_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
 void SystemState::soft_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
     stepper_driver_.soft_stop();
-    trajectory_ptr_ -> set_status(Trajectory::Done);
+    if (trajectory_ptr_ != nullptr)
+    {
+        trajectory_ptr_ -> set_status(Trajectory::Done);
+    }
     json_rsp["success"] = true;
 }
 
