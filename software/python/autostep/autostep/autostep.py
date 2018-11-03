@@ -74,6 +74,7 @@ class Autostep(serial.Serial):
                 val = self.read()
         self.sensor_cal = None
         self.gear_ratio = self.DefaultGearRatio
+        self.trajectory_running = False
 
 
     def set_gear_ratio(self,gear_ratio):
@@ -145,6 +146,8 @@ class Autostep(serial.Serial):
         t_start = time.time()
         t_last = t_start
 
+        self.trajectory_running = True
+
         while True:
             t = time.time() - t_start
             if t > t_done:
@@ -174,6 +177,8 @@ class Autostep(serial.Serial):
         self.set_move_mode_to_jog()
         self.run(0.0)
 
+        self.trajectory_running = False
+
         if on_done_callback is not None:
             on_done_callback()
 
@@ -196,6 +201,7 @@ class Autostep(serial.Serial):
         rsp_dict = self.send_cmd(cmd_dict)
 
         data_list = []
+        self.trajectory_running = True
         while True:
             with self.lock:
                 dat_json = self.readline()
@@ -207,7 +213,7 @@ class Autostep(serial.Serial):
                 else:
                     break
             else:
-                if dat_dict:
+                if dat_dict: 
                     elapsed_time = dat_dict['t']
                     position = dat_dict['p']
                     setpoint = dat_dict['s']
@@ -215,6 +221,7 @@ class Autostep(serial.Serial):
                     on_data_callback(elapsed_time, position, setpoint, sensor)
                 else:
                     break
+        self.trajectory_running = False
 
         if on_done_callback is not None:
             on_done_callback()
@@ -282,9 +289,12 @@ class Autostep(serial.Serial):
         """
         Check if motor is busy performing a motion command
         """
-        cmd_dict = {'command': 'is_busy'}
-        rsp_dict = self.send_cmd(cmd_dict)
-        return rsp_dict['is_busy']
+        if self.trajectory_running:
+            return True
+        else:
+            cmd_dict = {'command': 'is_busy'}
+            rsp_dict = self.send_cmd(cmd_dict)
+            return rsp_dict['is_busy']
 
 
     def busy_wait(self):
