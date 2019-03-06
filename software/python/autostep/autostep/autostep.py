@@ -74,7 +74,10 @@ class Autostep(serial.Serial):
                 val = self.read()
         self.sensor_cal = None
         self.gear_ratio = self.DefaultGearRatio
+
+        self.sinusoid_running = False
         self.trajectory_running = False
+        self.stop_tracjectory = False
 
 
     def set_gear_ratio(self,gear_ratio):
@@ -147,10 +150,11 @@ class Autostep(serial.Serial):
         t_last = t_start
 
         self.trajectory_running = True
+        self.stop_signal = False
 
         while True:
             t = time.time() - t_start
-            if t > t_done:
+            if t > t_done or self.stop_signal:
                 break
 
             dt = t - t_last
@@ -201,7 +205,7 @@ class Autostep(serial.Serial):
         rsp_dict = self.send_cmd(cmd_dict)
 
         data_list = []
-        self.trajectory_running = True
+        self.sinusoid_running = True
         while True:
             with self.lock:
                 dat_json = self.readline()
@@ -209,19 +213,27 @@ class Autostep(serial.Serial):
             dat_dict = json.loads(dat_json.decode())
             if on_data_callback is None:
                 if dat_dict:
-                    data_list.append([dat_dict['t'], dat_dict['p'], dat_dict['s'], dat_dict['m']])
+                    try:
+                        data_list.append([dat_dict['t'], dat_dict['p'], dat_dict['s'], dat_dict['m']])
+                    except KeyError:
+                        pass
                 else:
                     break
             else:
                 if dat_dict: 
-                    elapsed_time = dat_dict['t']
-                    position = dat_dict['p']
-                    setpoint = dat_dict['s']
-                    sensor = dat_dict['m']
-                    on_data_callback(elapsed_time, position, setpoint, sensor)
+                    try:
+                        elapsed_time = dat_dict['t']
+                        position = dat_dict['p']
+                        setpoint = dat_dict['s']
+                        sensor = dat_dict['m']
+                        have_data = True
+                    except KeyError:
+                        have_data = False
+                    if have_data:
+                        on_data_callback(elapsed_time, position, setpoint, sensor)
                 else:
                     break
-        self.trajectory_running = False
+        self.sinusoid_running = False
 
         if on_done_callback is not None:
             on_done_callback()
@@ -273,6 +285,7 @@ class Autostep(serial.Serial):
         """
         Perform soft stop - motor will stop using deceleration in current mode (jog or max).
         """
+        self.stop_signal = True
         cmd_dict = {'command': 'soft_stop'}
         self.send_cmd(cmd_dict)
 
@@ -281,6 +294,7 @@ class Autostep(serial.Serial):
         """
         Perform hard stop - motor will stop as quickly as possible. Ignores deceleration settings.
         """
+        self.stop_signal = True
         cmd_dict = {'command': 'hard_stop'}
         self.send_cmd(cmd_dict)
 
@@ -289,12 +303,23 @@ class Autostep(serial.Serial):
         """
         Check if motor is busy performing a motion command
         """
-        if self.trajectory_running:
+        if self.trajectory_running or self.sinusoid_running:
             return True
         else:
             cmd_dict = {'command': 'is_busy'}
-            rsp_dict = self.send_cmd(cmd_dict)
-            return rsp_dict['is_busy']
+            try:
+                # Note, the try/except is a bit of a kludge to make this more robust in situations
+                # where we running trajectories/sinusoids and polling the drive to check is if it 
+                # is busy.
+                rsp_dict = self.send_cmd(cmd_dict)
+                have_rsp = True
+            except (KeyError, AutostepException):
+                have_rsp = False
+            
+            if have_rsp:
+                return rsp_dict['is_busy']
+            else:
+                return True
 
 
     def busy_wait(self):
@@ -325,9 +350,12 @@ class Autostep(serial.Serial):
         """
         Get the current position (deg) of the motor.
         """
-        cmd_dict = {'command': 'get_position'}
-        rsp_dict = self.send_cmd(cmd_dict)
-        position_adj = rsp_dict['position']/self.gear_ratio
+        if self.sinusoid_running:
+            return None  # Kludge to prevent position polling from causing issue with sinusoidal trajectories.
+        else:
+            cmd_dict = {'command': 'get_position'}
+            rsp_dict = self.send_cmd(cmd_dict)
+            position_adj = rsp_dict['position']/self.gear_ratio
         return position_adj 
 
     
