@@ -77,7 +77,7 @@ class Autostep(serial.Serial):
 
         self.sinusoid_running = False
         self.trajectory_running = False
-        self.stop_tracjectory = False
+        self.stop_signal = False
 
 
     def set_gear_ratio(self,gear_ratio):
