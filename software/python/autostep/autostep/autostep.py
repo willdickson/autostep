@@ -1,3 +1,8 @@
+"""
+autostep.py
+===========
+
+"""
 from __future__ import print_function
 import serial
 import atexit
@@ -10,9 +15,23 @@ import threading
 
 class Autostep(serial.Serial):
 
-    """
-    Provides a serial interface to the Autostep firmware for controlling the
-    LM6470 dSPIN motor driver (as implemented in the Sparkfun Autodriver).
+    """ 
+    Provides a serial interface to the autostep firmware for controlling the
+    LM6470 dSPIN motor driver. 
+    
+    Automatically connects to USB/Serial device on object creation.
+
+    Parameters
+    ==========
+    port : str
+        name of serial port associated with autostep hardware
+    timeout : float
+        serial port read time out value (seconds)
+    reset_sleep : float
+        timeout proir to possible hardware reset on device connection (seconds)
+    debug : bool
+        flag to turn on debugging messages
+        
     """
 
     Baudrate = 115200
@@ -81,14 +100,19 @@ class Autostep(serial.Serial):
 
 
     def set_gear_ratio(self,gear_ratio):
-        """
-        Set the gear ratio - can be used to adjust for geared load.
+        """ Sets the gear ratio used by the system.
+
+        Parameters
+        ----------
+        gear_ratio : float 
+            ratio between stepper and output shaft. 
+
         """
         self.gear_ratio = gear_ratio
 
     def enable(self):
         """
-        Enable motor. When enabled motor will be held in firmly in position.
+        Enables motor power. When enabled motor will be held in firmly in position.
         """
         cmd_dict = {'command': 'enable'}
         self.send_cmd(cmd_dict)
@@ -96,8 +120,8 @@ class Autostep(serial.Serial):
 
     def release(self):
         """
-        Release motor.  Performs soft stop and them puts motor drive into a high impedance
-        state so that not current flows through windings.
+        Releases motor power.  Performs soft stop and them puts motor drive
+        into a high impedance state so that not current flows through windings.
         """
         cmd_dict = {'command': 'release'}
         self.send_cmd(cmd_dict)
@@ -105,8 +129,18 @@ class Autostep(serial.Serial):
 
     def run(self, velocity):
         """
-        Run motor and given velocity (deg/sec). Motor will run at this velocity until 
-        given another command (e.g. soft_stop, etc.)
+        Run motor (or output shaft) and given velocity (deg/sec). Motor will
+        run at this velocity until given another command e.g. soft_stop, etc.
+
+        Note, this command takes into account the gear ratio so setting the
+        gear ratio to 2.0 cause motor to run at twice the set velocity -  so
+        that the output shaft runs at the set velocity. 
+
+        Parameters
+        ----------
+        velocity : float
+            desired velocity of motor in deg/sec
+
         """
         velocity_adj = velocity*self.gear_ratio
         cmd_dict = {'command': 'run', 'velocity': velocity_adj}
@@ -114,9 +148,20 @@ class Autostep(serial.Serial):
 
 
     def run_with_feedback(self,velocity):
-        """
-        Run motor and given velocity (deg/sec). Motor will run at this velocity until 
-        given another command (e.g. soft_stop, etc.)
+        """ 
+        Run motor and given velocity (deg/sec). Motor will run at this velocity
+        until given another command (e.g. soft_stop, etc.) Returns the current
+        position of the output shaft for use in realtime feedback loops.
+
+        Note, this command takes into account the gear ratio so setting the
+        gear ratio to 2.0 cause motor to run at twice the set velocity -  so
+        that the output shaft runs at the set velocity. 
+
+        Parameters
+        ----------
+        velocity : float
+            desired velocity of motor in deg/sec
+
         """
         velocity_adj = velocity*self.gear_ratio
         cmd_dict = {'command': 'run_with_feedback', 'velocity': velocity_adj}
