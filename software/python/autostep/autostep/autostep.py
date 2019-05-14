@@ -112,7 +112,7 @@ class Autostep(serial.Serial):
 
     def enable(self):
         """
-        Enables motor power. When enabled motor will be held in firmly in position.
+        Enable motor power. When enabled motor will be held in firmly in position.
         """
         cmd_dict = {'command': 'enable'}
         self.send_cmd(cmd_dict)
@@ -120,8 +120,8 @@ class Autostep(serial.Serial):
 
     def release(self):
         """
-        Releases motor power.  Performs soft stop and them puts motor drive
-        into a high impedance state so that not current flows through windings.
+        Release motor power.  Performs soft stop and them puts motor drive
+        into a high impedance state so that no current flows through windings.
         """
         cmd_dict = {'command': 'release'}
         self.send_cmd(cmd_dict)
@@ -171,7 +171,23 @@ class Autostep(serial.Serial):
 
     def run_trajectory(self, t_done, position_func, velocity_func, disp=False, on_data_callback=None, on_done_callback=None):
         """
-        Run trajectory given by position and velocity_functions
+        Run trajectory given by position and velocity_functions.
+
+        Parameters
+        ----------
+        t_done : float
+            time in seconds when tracjectory should finish
+        position_func : function
+            function which takes time (sec) as an input argument and returns set-point position (deg)
+        velocity_func : function
+            function which takes time (sec) as an input argument and returns the set-point velocity (deg/sec)
+        disp : bool
+            boolean flag which set whether or not to display (print) information while running the tracjetory
+        on_data_callback : function
+            function which gets called on each time step. Arguments: time (sec), position predicted (deg) position next (deg)
+        on_done_callback : function
+            function which
+
         """
 
         pos_init = position_func(0)
