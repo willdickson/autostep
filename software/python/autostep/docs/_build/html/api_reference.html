@@ -1,0 +1,501 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="python">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>API Reference &#8212; autostep 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ROS Package" href="ros.html" />
+    <link rel="prev" title="Quick Start Guide" href="quick_start.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ros.html" title="ROS Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="quick_start.html" title="Quick Start Guide"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">autostep 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API Reference</a><ul>
+<li><a class="reference internal" href="#autostep-py">autostep.py</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="quick_start.html"
+                        title="previous chapter">Quick Start Guide</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ros.html"
+                        title="next chapter">ROS Package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/api_reference.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-autostep.autostep">
+<span id="api-reference"></span><span id="api-ref"></span><h1>API Reference<a class="headerlink" href="#module-autostep.autostep" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="autostep-py">
+<h2>autostep.py<a class="headerlink" href="#autostep-py" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="autostep.autostep.Autostep">
+<em class="property">class </em><code class="descclassname">autostep.autostep.</code><code class="descname">Autostep</code><span class="sig-paren">(</span><em>port</em>, <em>timeout=10.0</em>, <em>reset_sleep=0.0</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides a serial interface to the autostep firmware for controlling the
+LM6470 dSPIN motor driver.</p>
+<p>Automatically connects to USB/Serial device on object creation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>port</strong> (<em>str</em>) -- name of serial port associated with autostep hardware</li>
+<li><strong>timeout</strong> (<em>float</em>) -- serial port read time out value (seconds)</li>
+<li><strong>reset_sleep</strong> (<em>float</em>) -- timeout proir to possible hardware reset on device connection (seconds)</li>
+<li><strong>debug</strong> (<em>bool</em>) -- flag to turn on debugging messages</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="autostep.autostep.Autostep.apply_sensor_calibration">
+<code class="descname">apply_sensor_calibration</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.apply_sensor_calibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies sensor calibration - converts values measured by sensor to motor position in
+degrees.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.autoset_position">
+<code class="descname">autoset_position</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.autoset_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatically sets the motor position from the EM3242 angle sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.busy_wait">
+<code class="descname">busy_wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.busy_wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait unil current motion command is finshed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.calibrate_sensor">
+<code class="descname">calibrate_sensor</code><span class="sig-paren">(</span><em>num_pts=10</em>, <em>margin=1.5</em>, <em>plot_data=True</em>, <em>print_info=True</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.calibrate_sensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate calibration for EM3242 sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.clear_sensor_calibration">
+<code class="descname">clear_sensor_calibration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.clear_sensor_calibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any existing sensor calibration data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.enable">
+<code class="descname">enable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.enable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable motor power. When enabled motor will be held in firmly in position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_fullstep_per_rev">
+<code class="descname">get_fullstep_per_rev</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_fullstep_per_rev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the fullsteps/revolution for the stepper motor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_jog_mode_params">
+<code class="descname">get_jog_mode_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_jog_mode_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the set of parameters used for 'jog' movement mode.
+speed (deg/sec), accel (deg/sec**2) and decel  (deg/sec**2).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_kval_params">
+<code class="descname">get_kval_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_kval_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the kval parameters. The kval parameters are coefficients
+which scale the sinewave amplitudes used for phase current control.</p>
+<p>Returns a dict with parameters accel, decel, run and hold.  Parameters
+have 0-255 value range.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_max_mode_params">
+<code class="descname">get_max_mode_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_max_mode_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the set of parameters used for 'max' movement mode.
+speed (deg/sec), accel (deg/sec**2) and decel  (deg/sec**2).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_oc_threshold">
+<code class="descname">get_oc_threshold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_oc_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the overcurrent threshold. The overcurrent threshold set the current at which an
+overcurrent event (disable) occurs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_params">
+<code class="descname">get_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns dictionary of driver parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_position">
+<code class="descname">get_position</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current position (deg) of the motor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_position_fullsteps">
+<code class="descname">get_position_fullsteps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_position_fullsteps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the current position of the motor in fullsteps</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_position_microsteps">
+<code class="descname">get_position_microsteps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_position_microsteps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the current position of the motor in microsteps</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_position_sensor">
+<code class="descname">get_position_sensor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_position_sensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the current position of the motor as given by the EM3242 angle sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_step_mode">
+<code class="descname">get_step_mode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_step_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current step_mode (e.g. STEP_FS, STEP_FS_2, ...)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.get_voltage_sensor">
+<code class="descname">get_voltage_sensor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.get_voltage_sensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the current voltage value fo the EM3242 angle sensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.hard_stop">
+<code class="descname">hard_stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.hard_stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform hard stop - motor will stop as quickly as possible. Ignores deceleration settings.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.have_calibraiton">
+<code class="descname">have_calibraiton</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.have_calibraiton" title="Permalink to this definition">¶</a></dt>
+<dd><p>True/False based on existance of sensor calibration</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.is_busy">
+<code class="descname">is_busy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.is_busy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if motor is busy performing a motion command</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.load_sensor_calibration">
+<code class="descname">load_sensor_calibration</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.load_sensor_calibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the sensor calibration from a file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.move_by">
+<code class="descname">move_by</code><span class="sig-paren">(</span><em>step</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.move_by" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move motor by specified value (deg). Motor will run until it reaches this position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.move_to">
+<code class="descname">move_to</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.move_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move motor to specified position (deg). Motor will run until it reaches this position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.move_to_fullsteps">
+<code class="descname">move_to_fullsteps</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.move_to_fullsteps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move motor to specified position in fullsteps. Motor will run until it reaches this position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.move_to_microsteps">
+<code class="descname">move_to_microsteps</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.move_to_microsteps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move motor to specified position in microsteps. Motor will run until it reaches this position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.move_to_sinusoid_start">
+<code class="descname">move_to_sinusoid_start</code><span class="sig-paren">(</span><em>param</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.move_to_sinusoid_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move to sinusoid start position</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.print_params">
+<code class="descname">print_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.print_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the stepper driver parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.release">
+<code class="descname">release</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.release" title="Permalink to this definition">¶</a></dt>
+<dd><p>Release motor power.  Performs soft stop and them puts motor drive
+into a high impedance state so that no current flows through windings.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>velocity</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run motor (or output shaft) and given velocity (deg/sec). Motor will
+run at this velocity until given another command e.g. soft_stop, etc.</p>
+<p>Note, this command takes into account the gear ratio so setting the
+gear ratio to 2.0 cause motor to run at twice the set velocity -  so
+that the output shaft runs at the set velocity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>velocity</strong> (<em>float</em>) -- desired velocity of motor in deg/sec</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.run_autoset_procedure">
+<code class="descname">run_autoset_procedure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.run_autoset_procedure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs autoset procedure to ensure consistance between autoset position and
+saved sensor calibrations.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.run_trajectory">
+<code class="descname">run_trajectory</code><span class="sig-paren">(</span><em>t_done</em>, <em>position_func</em>, <em>velocity_func</em>, <em>disp=False</em>, <em>on_data_callback=None</em>, <em>on_done_callback=None</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.run_trajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run trajectory given by position and velocity_functions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>t_done</strong> (<em>float</em>) -- time in seconds when tracjectory should finish</li>
+<li><strong>position_func</strong> (<em>function</em>) -- function which takes time (sec) as an input argument and returns set-point position (deg)</li>
+<li><strong>velocity_func</strong> (<em>function</em>) -- function which takes time (sec) as an input argument and returns the set-point velocity (deg/sec)</li>
+<li><strong>disp</strong> (<em>bool</em>) -- boolean flag which set whether or not to display (print) information while running the tracjetory</li>
+<li><strong>on_data_callback</strong> (<em>function</em>) -- function which gets called on each time step. Arguments: time (sec), position predicted (deg) position next (deg)</li>
+<li><strong>on_done_callback</strong> (<em>function</em>) -- function which</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.run_with_feedback">
+<code class="descname">run_with_feedback</code><span class="sig-paren">(</span><em>velocity</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.run_with_feedback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run motor and given velocity (deg/sec). Motor will run at this velocity
+until given another command (e.g. soft_stop, etc.) Returns the current
+position of the output shaft for use in realtime feedback loops.</p>
+<p>Note, this command takes into account the gear ratio so setting the
+gear ratio to 2.0 cause motor to run at twice the set velocity -  so
+that the output shaft runs at the set velocity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>velocity</strong> (<em>float</em>) -- desired velocity of motor in deg/sec</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.save_sensor_calibration">
+<code class="descname">save_sensor_calibration</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.save_sensor_calibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves sensor calibration (if it exists) to a file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.send_cmd">
+<code class="descname">send_cmd</code><span class="sig-paren">(</span><em>cmd_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.send_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a command to the device.  Low-level method - command is specified
+using command dictionary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.set_fullstep_per_rev">
+<code class="descname">set_fullstep_per_rev</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.set_fullstep_per_rev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the fullstep/revolution setting for the stepper motor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.set_gear_ratio">
+<code class="descname">set_gear_ratio</code><span class="sig-paren">(</span><em>gear_ratio</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.set_gear_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the gear ratio used by the system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gear_ratio</strong> (<em>float</em>) -- ratio between stepper and output shaft.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.set_jog_mode_params">
+<code class="descname">set_jog_mode_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.set_jog_mode_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the paramaters used for 'jog' movement mode.
+speed (deg/sec), accel (deg/sec**2) and decel  (deg/sec**2).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.set_kval_params">
+<code class="descname">set_kval_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.set_kval_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the kval parameters. The kval parameters are coefficients
+which scale the sinewave amplitudes used for phase current control.</p>
+<p>Takes a dict with parameters accel, decel, run and hold.  Parameters
+have 0-255 value range.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.set_max_mode_params">
+<code class="descname">set_max_mode_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.set_max_mode_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the paramaters used for 'max' movement mode.
+speed (deg/sec), accel (deg/sec**2) and decel  (deg/sec**2).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.set_move_mode_to_jog">
+<code class="descname">set_move_mode_to_jog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.set_move_mode_to_jog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set movement mode to jog - softer acceleration/decelerat for positioning.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.set_move_mode_to_max">
+<code class="descname">set_move_mode_to_max</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.set_move_mode_to_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set movement mode to max - maximum acceleration/deceleration</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.set_oc_threshold">
+<code class="descname">set_oc_threshold</code><span class="sig-paren">(</span><em>threshold</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.set_oc_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the overcurrent threshold. The overcurrent threshold set the current at which an
+overcurrent event (disable) occurs.</p>
+<p>The value must be in the OC_ThresholdList.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.set_position">
+<code class="descname">set_position</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.set_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the current motor position (deg). Note, not a motion command - just assigns
+the current position of the motor to the given position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.set_step_mode">
+<code class="descname">set_step_mode</code><span class="sig-paren">(</span><em>step_mode</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.set_step_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets step mode used by the drive (mode should be in StepModeList).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.sinusoid">
+<code class="descname">sinusoid</code><span class="sig-paren">(</span><em>param</em>, <em>on_data_callback=None</em>, <em>on_done_callback=None</em><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.sinusoid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run sinusoidal trajectory with given amplitude, period, phase, offest and number of cycles.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autostep.autostep.Autostep.soft_stop">
+<code class="descname">soft_stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autostep.autostep.Autostep.soft_stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform soft stop - motor will stop using deceleration in current mode (jog or max).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="autostep.autostep.AutostepException">
+<em class="property">exception </em><code class="descclassname">autostep.autostep.</code><code class="descname">AutostepException</code><a class="headerlink" href="#autostep.autostep.AutostepException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ros.html" title="ROS Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="quick_start.html" title="Quick Start Guide"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">autostep 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Will Dickson.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

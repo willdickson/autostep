@@ -1,0 +1,151 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="python">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Autostep: Stepper Motor Control &#8212; autostep 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Hardware Setup" href="hardware.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hardware.html" title="Hardware Setup"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">autostep 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Autostep: Stepper Motor Control</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="hardware.html"
+                        title="next chapter">Hardware Setup</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="autostep-stepper-motor-control">
+<h1>Autostep: Stepper Motor Control<a class="headerlink" href="#autostep-stepper-motor-control" title="Permalink to this headline">¶</a></h1>
+<img alt="_images/steppers.png" src="_images/steppers.png" />
+<p>Autostep provides hardware, firmware and software libraries which enable
+USB/Serial control of stepper motors driven by the STMicro L6470 dSPIN stepper
+motor driver.  This stepper motor driver IC can control a stepper motor from a 8-45V
+supply at up to 3A,  communicates with the host microcontroller over an SPI
+connection and can autonomously executes movement commands eliminating the need
+for step counting etc.  The L4670 IC is available in convenient low development
+boards such as the <a class="reference external" href="https://www.sparkfun.com/products/13752">Sparkfun Autodriver</a>.</p>
+<p>Autostep provides following components to facilitate use of this IC based stepper driver:</p>
+<ul class="simple">
+<li><strong>Hardware</strong> for conveniently  connecting the <a class="reference external" href="https://www.pjrc.com/store/teensy32.html">teensy 3.2</a> development board to the
+<a class="reference external" href="https://www.sparkfun.com/products/13752">Sparkfun Autodriver</a></li>
+<li><strong>Firmware</strong> for the <a class="reference external" href="https://www.pjrc.com/store/teensy32.html">teensy 3.2</a>
+which enables the stepper to be controlled via USB/Serial commands</li>
+<li>A <strong>Python Library</strong> which communicates with device firmware over USB/Serial and enables high
+level motion control</li>
+<li>A <strong>ROS Package</strong> enabling use of the autostep with Robot Operating System
+(ROS).</li>
+</ul>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firmware.html">Firmware Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#autostep-py">autostep.py</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ros.html">ROS Package</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hardware.html" title="Hardware Setup"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">autostep 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Will Dickson.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

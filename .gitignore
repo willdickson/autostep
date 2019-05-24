@@ -4,4 +4,3 @@
 *.hdf5
 *.cal
 node_modules
-_build
