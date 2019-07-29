@@ -643,7 +643,7 @@ class Autostep(serial.Serial):
         """
         int_value = int(value)
         if int_value <= 0:
-            raise ValueError, 'fullstep_per_rev must > 0'
+            raise ValueError('fullstep_per_rev must > 0')
         cmd_dict = {'command': 'set_fullstep_per_rev', 'fullstep_per_rev': int_value}
         self.send_cmd(cmd_dict)
 
@@ -734,7 +734,7 @@ class Autostep(serial.Serial):
         The value must be in the OC_ThresholdList. 
         """
         if not threshold in self.OC_ThresholdList:
-            raise ValueError, 'unknown oc_threshold'
+            raise ValueError('unknown oc_threshold')
         cmd_dict = {'command': 'set_oc_threshold', 'threshold': threshold}
         self.send_cmd(cmd_dict)
 
@@ -759,15 +759,15 @@ class Autostep(serial.Serial):
         print('oc threshold:  {0}'.format(oc_threshold))
         print()
         print('jog mode:')
-        for k,v in jog_mode_params.iteritems():
+        for k,v in jog_mode_params.items():
             print('  {0}: {1} {2}'.format(k,v,self.MoveModeUnits[k]))
         print()
         print('max mode:')
-        for k, v in max_mode_params.iteritems():
+        for k, v in max_mode_params.items():
             print('  {0}: {1} {2}'.format(k,v,self.MoveModeUnits[k]))
         print()
         print('kvals (0-255): ')
-        for k,v in kval_params.iteritems():
+        for k,v in kval_params.items():
             print('  {0:<6} {1}'.format(k+':',v))
         print()
 
