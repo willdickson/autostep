@@ -219,8 +219,8 @@ class Autostep(serial.Serial):
                 break
 
             dt = t - t_last
-            pos_next = position_func(t)
-            vel_next = velocity_func(t)
+            pos_next = float(position_func(t))
+            vel_next = float(velocity_func(t))
             t_last = t
 
             pos_pred = pos_curr + vel_curr*dt

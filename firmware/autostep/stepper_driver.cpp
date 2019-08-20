@@ -15,9 +15,9 @@ const int StepperDriver::Default_Fullstep_Per_Rev = 200;
 const byte StepperDriver::Default_Step_Mode = STEP_FS_64;
 
 // Default current and kval parameters
-const byte StepperDriver::Default_Kval_Acceleration = 15;
-const byte StepperDriver::Default_Kval_Deceleration = 15;
-const byte StepperDriver::Default_Kval_Run = 15;
+const byte StepperDriver::Default_Kval_Acceleration = 40;
+const byte StepperDriver::Default_Kval_Deceleration = 40;
+const byte StepperDriver::Default_Kval_Run = 40;
 const byte StepperDriver::Default_Kval_Hold = 10;
 const String StepperDriver::Default_OC_Threshold = String("OC_3375mA");
 //const String StepperDriver::Default_OC_Threshold = String("OC_2625mA");
