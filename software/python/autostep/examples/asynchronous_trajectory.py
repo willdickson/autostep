@@ -9,7 +9,7 @@ from autostep.utility import get_ramp
 port = '/dev/ttyACM0'
 
 stepper = Autostep(port)
-stepper.set_step_mode('STEP_FS_4') 
+stepper.set_step_mode('STEP_FS_16') 
 stepper.set_fullstep_per_rev(200)
 stepper.set_gear_ratio(1.0)
 
@@ -42,7 +42,7 @@ done = False
 while not done:
     state = traj.state
     done = state['done']
-    print('done = {done}, t = {t:0.1f}, pos = {pos:0.1f}'.format(**state))
+    #print('done = {done}, t = {t:0.1f}, pos = {pos:0.1f}'.format(**state))
     time.sleep(0.1)
 
 data = traj.data
