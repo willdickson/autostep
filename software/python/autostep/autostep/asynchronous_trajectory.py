@@ -138,7 +138,7 @@ class AsynchronousTrajectory(object):
 
         pos = self.dev.get_position()
         if abs(pos - pos_array[0]) > self.pos_tol:
-            raise RuntimeError, 'current pos is > pos_tol from pos_array start'
+            raise(RuntimeError, 'current pos is > pos_tol from pos_array start')
 
         t = self.dt*scipy.arange(0,pos_array.shape[0])
         t_done = t[-1] 

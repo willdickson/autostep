@@ -97,4 +97,4 @@ def get_ramp(x0,x1,vmax,a,dt, output='ramp only'):
     elif output=='full':
         return ramp, vmax, a
     else:
-        raise ValueError, 'unknown keyword option output=%s'%(output,)
+        raise(ValueError, 'unknown keyword option output=%s'%(output,))
