@@ -15,10 +15,10 @@ const int StepperDriver::Default_Fullstep_Per_Rev = 200;
 const byte StepperDriver::Default_Step_Mode = STEP_FS_64;
 
 // Default current and kval parameters
-const byte StepperDriver::Default_Kval_Acceleration = 150;
-const byte StepperDriver::Default_Kval_Deceleration = 150;
-const byte StepperDriver::Default_Kval_Run = 150;
-const byte StepperDriver::Default_Kval_Hold = 60;
+const byte StepperDriver::Default_Kval_Acceleration = 40;
+const byte StepperDriver::Default_Kval_Deceleration = 40;
+const byte StepperDriver::Default_Kval_Run = 40;
+const byte StepperDriver::Default_Kval_Hold = 20;
 const String StepperDriver::Default_OC_Threshold = String("OC_3375mA");
 //const String StepperDriver::Default_OC_Threshold = String("OC_2625mA");
 
@@ -33,7 +33,7 @@ const float StepperDriver::Default_Max_Acceleration = 80000.0;
 const float StepperDriver::Default_Max_Deceleration = 80000.0;
 
 // Micro to full step transistion (deg/sec)
-const float StepperDriver::Default_Full_Speed = 500.0;        
+const float StepperDriver::Default_Full_Speed = 2500.0;        
 
 
 // Stepper controller methods
@@ -570,7 +570,7 @@ bool StepperDriver::is_enabled()
 
 int StepperDriver::microstep_per_fullstep(byte step_mode)
 {
-    return 1 << step_mode;
+    return int(1 << step_mode);
 }
 
 
