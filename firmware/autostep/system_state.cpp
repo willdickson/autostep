@@ -29,6 +29,9 @@ void SystemState::initialize()
     velocity_controller_.set_position_gain(Position_Gain);
     velocity_controller_.set_velocity_ffwd(Velocity_FFwd);
 
+    rc_servo_.attach(RC_Servo_Pin);
+    rc_servo_.write(0);
+
     timer_flag_ = false;
     trajectory_ptr_ = nullptr;
     timer_callback_ = nullptr;
@@ -284,6 +287,14 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
     {
         set_position_command(json_msg, json_rsp);
     }
+    else if (command.equals("set_rc_servo")) 
+    { 
+        set_rc_servo_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_rc_servo"))
+    {
+        get_rc_servo_command(json_msg, json_rsp);
+    }
     else if (command.equals("get_position_fullsteps"))
     {
         get_position_fullsteps_command(json_msg, json_rsp);
@@ -477,6 +488,12 @@ void SystemState::run_with_feedback_command(JsonObject &json_msg, JsonObject &js
         stepper_driver_.run(velocity);
         json_rsp["success"] = true;
         json_rsp["position"] = position;
+        if (json_msg.containsKey("servo_angle"))
+        {
+            long servo_angle = json_msg["servo_angle"];
+            servo_angle = constrain(servo_angle, 0, 180);
+            rc_servo_.write(uint8_t(servo_angle));
+        }
     }
     else
     {
@@ -584,6 +601,30 @@ void SystemState::set_position_command(JsonObject &json_msg, JsonObject &json_rs
     }
 }
 
+
+void SystemState::get_rc_servo_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    long servo_angle = long(rc_servo_.read());
+    json_rsp["servo_angle"] = servo_angle;
+    json_rsp["success"] = true;
+}
+
+
+void SystemState::set_rc_servo_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("servo_angle"))
+    {
+        long servo_angle = json_msg["servo_angle"];
+        servo_angle = constrain(servo_angle, 0, 180);
+        rc_servo_.write(uint8_t(servo_angle));
+        json_rsp["success"] = true;
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing servo_angle";
+    }
+}
 
 void SystemState::get_position_fullsteps_command(JsonObject &json_msg, JsonObject &json_rsp)
 {

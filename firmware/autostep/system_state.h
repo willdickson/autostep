@@ -9,6 +9,7 @@
 #include "sin_trajectory.h"
 #include "velocity_controller.h"
 #include "ArduinoJson.h"
+#include "PWMServo.h"
 
 
 struct MoveModeParams 
@@ -40,8 +41,8 @@ class SystemState
 
         StepperDriver stepper_driver_;
         EM3242_AngleSensor angle_sensor_;
-
         VelocityController velocity_controller_;
+        PWMServo rc_servo_;
 
         volatile bool timer_flag_;
         IntervalTimer interval_timer_;
@@ -78,6 +79,9 @@ class SystemState
 
         void get_position_command(JsonObject &json_msg, JsonObject &json_rsp);
         void set_position_command(JsonObject &json_msg, JsonObject &json_rsp);
+
+        void get_rc_servo_command(JsonObject &json_msg, JsonObject &json_rsp);
+        void set_rc_servo_command(JsonObject &json_msg, JsonObject &json_rsp);
 
         void get_position_fullsteps_command(JsonObject &json_msg, JsonObject &json_rsp);
         void get_position_microsteps_command(JsonObject &json_msg, JsonObject &json_rsp);
