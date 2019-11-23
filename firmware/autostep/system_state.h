@@ -80,8 +80,8 @@ class SystemState
         void get_position_command(JsonObject &json_msg, JsonObject &json_rsp);
         void set_position_command(JsonObject &json_msg, JsonObject &json_rsp);
 
-        void get_rc_servo_command(JsonObject &json_msg, JsonObject &json_rsp);
-        void set_rc_servo_command(JsonObject &json_msg, JsonObject &json_rsp);
+        void get_servo_angle_command(JsonObject &json_msg, JsonObject &json_rsp);
+        void set_servo_angle_command(JsonObject &json_msg, JsonObject &json_rsp);
 
         void get_position_fullsteps_command(JsonObject &json_msg, JsonObject &json_rsp);
         void get_position_microsteps_command(JsonObject &json_msg, JsonObject &json_rsp);

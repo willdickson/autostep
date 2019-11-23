@@ -287,13 +287,13 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
     {
         set_position_command(json_msg, json_rsp);
     }
-    else if (command.equals("set_rc_servo")) 
+    else if (command.equals("set_servo_angle")) 
     { 
-        set_rc_servo_command(json_msg, json_rsp);
+        set_servo_angle_command(json_msg, json_rsp);
     }
-    else if (command.equals("get_rc_servo"))
+    else if (command.equals("get_servo_angle"))
     {
-        get_rc_servo_command(json_msg, json_rsp);
+        get_servo_angle_command(json_msg, json_rsp);
     }
     else if (command.equals("get_position_fullsteps"))
     {
@@ -602,7 +602,7 @@ void SystemState::set_position_command(JsonObject &json_msg, JsonObject &json_rs
 }
 
 
-void SystemState::get_rc_servo_command(JsonObject &json_msg, JsonObject &json_rsp)
+void SystemState::get_servo_angle_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
     long servo_angle = long(rc_servo_.read());
     json_rsp["servo_angle"] = servo_angle;
@@ -610,7 +610,7 @@ void SystemState::get_rc_servo_command(JsonObject &json_msg, JsonObject &json_rs
 }
 
 
-void SystemState::set_rc_servo_command(JsonObject &json_msg, JsonObject &json_rsp)
+void SystemState::set_servo_angle_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
     if (json_msg.containsKey("servo_angle"))
     {

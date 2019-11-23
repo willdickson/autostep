@@ -448,6 +448,21 @@ class Autostep(serial.Serial):
         return rsp_dict['position']
 
 
+    def set_servo_angle(self,angle):
+        """
+        Set the position (angle) of the rc servo
+        """
+        cmd_dict = {'command': 'set_servo_angle', 'servo_angle': int(angle)}
+        rsp_dict = self.send_cmd(cmd_dict)
+
+    def get_servo_angle(self):
+        """
+        Get the position (angle) of the rc servo
+        """
+        cmd_dict = {'command': 'get_servo_angle'}
+        rsp_dict = self.send_cmd(cmd_dict)
+        return rsp_dict['servo_angle']
+
     def get_position_sensor(self):
         """
         Gets the current position of the motor as given by the EM3242 angle sensor.
