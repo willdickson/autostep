@@ -147,7 +147,7 @@ class Autostep(serial.Serial):
         self.send_cmd(cmd_dict)
 
 
-    def run_with_feedback(self,velocity):
+    def run_with_feedback(self,velocity,servo_angle=None):
         """ 
         Run motor and given velocity (deg/sec). Motor will run at this velocity
         until given another command (e.g. soft_stop, etc.) Returns the current
@@ -165,6 +165,8 @@ class Autostep(serial.Serial):
         """
         velocity_adj = velocity*self.gear_ratio
         cmd_dict = {'command': 'run_with_feedback', 'velocity': velocity_adj}
+        if servo_angle is not None:
+            cmd_dict['servo_angle'] = int(servo_angle)
         rsp = self.send_cmd(cmd_dict)
         return rsp['position']/self.gear_ratio
 
