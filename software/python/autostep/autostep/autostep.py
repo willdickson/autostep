@@ -168,7 +168,10 @@ class Autostep(serial.Serial):
         if servo_angle is not None:
             cmd_dict['servo_angle'] = int(servo_angle)
         rsp = self.send_cmd(cmd_dict)
-        return rsp['position']/self.gear_ratio
+        # DEBUG --- remove this -----------------------------------
+        return rsp['position']/self.gear_ratio, rsp['velocity']
+        # DEBUG --------------- -----------------------------------
+        #return rsp['position']/self.gear_ratio
 
 
     def run_trajectory(self, t_done, position_func, velocity_func, disp=False, on_data_callback=None, on_done_callback=None):
