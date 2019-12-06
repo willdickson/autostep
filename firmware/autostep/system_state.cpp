@@ -483,14 +483,16 @@ void SystemState::run_with_feedback_command(JsonObject &json_msg, JsonObject &js
 {
     if (json_msg.containsKey("velocity"))
     {
-        float position = stepper_driver_.get_position();
         float velocity = json_msg["velocity"];
         stepper_driver_.run(velocity);
-        json_rsp["success"] = true;
+
+        float position = stepper_driver_.get_position();
         json_rsp["position"] = position;
+        json_rsp["success"] = true;
+
         // DEBUG ... remove this
         // -------------------------------------
-        json_rsp["velocity"] = velocity;
+        //json_rsp["velocity"] = velocity;
         // -------------------------------------
         if (json_msg.containsKey("servo_angle"))
         {

@@ -4,133 +4,120 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-port = '/dev/ttyACM0'
-dt = 0.5
-dt = 5.0
 
-velo_array = np.linspace(100,500,10)
-velo_array = np.array([10,20])
+def get_kinematics_func(step_period, step_amplitude, rc_period, rc_amplitude):
+    """
+    Simple sinusoidal kinematics for stepper and rc servo
 
-stepper = Autostep(port)
-stepper.set_step_mode('STEP_FS_128') 
-stepper.set_fullstep_per_rev(200)
-stepper.set_move_mode_to_max()
-stepper.enable()
+    """
+
+    def vel_func(t):
+        return -(2.0*np.pi/step_period)*step_amplitude*np.sin(2.0*np.pi*t/step_period)
+    
+    def pos_func(t):
+        return step_amplitude*np.cos(2.0*np.pi*t/step_period)
+
+    def rc_func(t):
+        return  rc_amplitude*(np.cos(2.0*np.pi*t/rc_period) + 1)
+
+    return pos_func, vel_func, rc_func
 
 
-stepper.run(0.0)  
-time.sleep(1.0)
+# ---------------------------------------------------------------------------------
+if __name__ == '__main__':
 
-for i, velo in enumerate(velo_array): 
-    print(i, velo)
-    #stepper.run(velo)  
-    stepper.run_with_feedback(velo)  
-    time.sleep(dt)
+    port = '/dev/ttyACM0'
 
-stepper.run(0.0)  
+    gain = 5.0
+    sleep_dt = 0.005
+    
+    step_period = 4.0
+    step_amplitude = 45.0
+    rc_period = 8.0
+    rc_amplitude = 80.0
+    t_end = 2*step_period 
+    
+    pos_set_func, vel_set_func, rc_set_func = get_kinematics_func(
+            step_period,
+            step_amplitude, 
+            rc_period,
+            rc_amplitude
+            )
+    
+    dev = Autostep(port)
+    dev.set_step_mode('STEP_FS_64') 
+    dev.set_fullstep_per_rev(200)
+    dev.set_gear_ratio(1.0)
+    dev.set_jog_mode_params({'speed': 200,  'accel': 1000, 'decel': 1000})
+    dev.set_max_mode_params({'speed': 1000,  'accel': 30000, 'decel': 30000})
+    dev.set_move_mode_to_max()
+    dev.enable()
+    dev.print_params()
+    dev.run(0.0)  
+    
+    t_start = time.time()
+    t_last = t_start
+    
+    t_list = []
+    pos_tru_list = []
+    pos_set_list = []
+    
+    pos_last = pos_set_func(0)
+    dev.set_position(pos_last)
+    
+    vel_last = vel_set_func(0) 
+    dev.run(vel_last)
+    
+    done = False
+    
+    while not done:
+        
+        t = time.time() - t_start
 
-#port = '/dev/ttyACM0'
-#
-#dev = Autostep(port)
-#dev.set_step_mode('STEP_FS_128') 
-##dev.set_fullstep_per_rev(200)
-##dev.set_jog_mode_params({'speed': 100,  'accel': 1000, 'decel': 1000})
-##dev.set_max_mode_params({'speed': 800,  'accel': 100000, 'decel': 100000})
-##dev.set_move_mode_to_jog()
-##dev.set_gear_ratio(1.0)
-#dev.enable()
-#dev.set_position(0.0)
-#
-#dt = 0.05
-#period = 4.0
-#num_cycle = 1
-#stepper_amp = 30.0
-#rcservo_amp = 80.0
-#gain = 20.0
-#
-#num_step = int(period*num_cycle/dt)
-#t_array = dt*np.arange(num_step)
-#
-#stepper_ang_array = stepper_amp*np.cos(2.0*np.pi*t_array/period)
-#rcservo_ang_array = rcservo_amp*(1.0 + np.cos(2.0*np.pi*t_array/period)) 
-#
-#stepper_vel_array = np.zeros(stepper_ang_array.shape)
-#stepper_vel_array[1:] = (stepper_ang_array[1:] - stepper_ang_array[:-1])/dt
-#
-#if 0:
-#    plt.subplot(3,1,1)
-#    plt.plot(t_array,stepper_ang_array,'b')
-#    plt.ylabel('step (deg)')
-#    plt.grid('on')
-#    plt.subplot(3,1,2)
-#    plt.plot(t_array,stepper_vel_array,'b')
-#    plt.ylabel('step (vel)')
-#    plt.grid('on')
-#    plt.subplot(3,1,3)
-#    plt.plot(t_array,rcservo_ang_array,'b')
-#    plt.ylabel('rc (ang)')
-#    plt.xlabel('t (sec)')
-#    plt.grid('on')
-#    plt.show()
-#
-#
-## Move to initial position
-##dev.set_servo_angle(rcservo_ang_array[0])
-##dev.move_to(stepper_ang_array[0])
-##dev.busy_wait()
-#
-## Set move mode to max for run with feedback
-#dev.set_move_mode_to_max()
-#
-#zipped_motion_data = zip(t_array, stepper_ang_array, stepper_vel_array, rcservo_ang_array)
-#
-#stepper_vel_adj = 0
-#
-#stepper_ang_tru_list = []
-#stepper_ang_err_list = []
-#
-#dev.run_with_feedback(10.0)
-#time.sleep(5.0)
-#dev.run(0)
-#
-#
-##for motion_tuple in zipped_motion_data:
-##
-##    t, stepper_ang_set, stepper_vel_set, rcservo_ang_set = motion_tuple
-##    #stepper_ang_tru, stepper_vel_tru = dev.run_with_feedback(stepper_vel_adj)
-##    stepper_ang_tru, stepper_vel_tru = dev.run_with_feedback(10.0)
-##    stepper_ang_est = stepper_ang_tru + stepper_vel_adj*dt
-##    stepper_ang_err = stepper_ang_set - stepper_ang_est
-##    #stepper_vel_adj = gain*stepper_ang_err + stepper_vel_set
-##    stepper_vel_adj = stepper_vel_set
-##    #stepper_vel_adj = gain*stepper_ang_err 
-##
-##    stepper_ang_tru_list.append(stepper_ang_tru)
-##    stepper_ang_err_list.append(stepper_ang_err)
-##
-##    print('{:1.2f}, {:1.2f}, {:1.2f}'.format(stepper_vel_adj, stepper_vel_set, stepper_vel_tru))
-##
-##
-##    #print('t: {:1.2f}, stepper_ang: {:1.2f}, stepper_vel: {:1.2f}, rcservo_ang: {:1.2f}'.format(*motion_tuple))
-##    #print('adj: {:1.2f}'.format(stepper_vel_adj))
-##    time.sleep(dt)
-#
-##dev.set_move_mode_to_jog()
-##dev.move_to(0)  
-##dev.busy_wait()
-#
-#stepper_ang_tru_array = np.array(stepper_ang_tru_list)
-#stepper_ang_err_array = np.array(stepper_ang_err_list)
-#
-##plt.subplot(2,1,1)
-##plt.plot(t_array,stepper_ang_array,'b')
-##plt.plot(t_array,stepper_ang_tru_array,'r')
-##plt.ylabel('angle (deg)')
-##plt.grid(True)
-##
-##plt.subplot(2,1,2)
-##plt.plot(t_array,stepper_ang_err_array,'b')
-##plt.ylabel('error (deg)')
-##plt.grid(True)
-##plt.xlabel('t (sec)')
-##plt.show()
+        # Compute estimated position (since last update)
+        pos_est = pos_last + (t-t_last)*vel_last
+
+        # Get new setpoint values
+        pos_set = pos_set_func(t)
+        vel_set = vel_set_func(t)
+        rc_set  = rc_set_func(t)
+    
+        # Caluculate position error and use to determine correction velocity
+        pos_err = pos_set - pos_est
+        vel_adj = vel_set + gain*pos_err
+
+        # Set stepper to run at correction velocity and get current position
+        pos_tru = dev.run_with_feedback(vel_adj,rc_set)
+
+        # Save update time and position/velocity information from update
+        t_last = t
+        pos_last = pos_tru
+        vel_last = vel_adj
+
+        # Check if we are done
+        if t >= t_end:
+            done = True
+        
+        # Save data for plotting
+        t_list.append(t)
+        pos_tru_list.append(pos_tru)
+        pos_set_list.append(pos_set)
+    
+        print('t: {:1.2f}, pos: {:1.2f}'.format(t,pos_tru))
+        time.sleep(sleep_dt)
+    
+    dev.run(0.0)  
+    
+    
+    # Plot results
+    plt.plot(t_list, pos_tru_list,'.b')
+    plt.plot(t_list, pos_set_list, 'r')
+    plt.xlabel('t (sec)')
+    plt.ylabel('ang (deg)')
+    plt.grid(True)
+    
+    plt.show()
+
+
+
+
