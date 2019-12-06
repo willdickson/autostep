@@ -13,9 +13,11 @@ angle_list_fwd = range(0,180,1)
 angle_list_rev = angle_list_fwd[::-1] 
 angle_list = angle_list_fwd + angle_list_rev
 
-for i, angle in enumerate(angle_list):
-    print('i: {}, angle: {}'.format(i, angle))
-    stepper.set_servo_angle(angle)
-    time.sleep(0.01)
+
+while True:
+    for i, angle in enumerate(angle_list):
+        print('i: {}, angle: {}'.format(i, angle))
+        stepper.set_servo_angle(angle)
+        time.sleep(0.01)
 
 
