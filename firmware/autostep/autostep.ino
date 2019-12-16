@@ -16,6 +16,7 @@ void setup()
 
 void loop()
 {
+    system_state.update_homing();
     system_state.update_trajectory();
     system_state.process_messages();
 }

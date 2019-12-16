@@ -39,16 +39,9 @@ void SystemState::initialize()
     time_sec_ = 0.0;
     data_send_dt_ = 0.01;
 
-    // DEBUG
-    // --------------------------------------------------
-    pinMode(2,OUTPUT);
-    digitalWrite(2,LOW);
-    // --------------------------------------------------
-
-    // TEMPORARY  - mold rotation
-    // --------------------------------------------------
-    // stepper_driver_.run(30.0);
-    // --------------------------------------------------
+    homing_flag_ = false;
+    homing_polarity_ = Default_Home_Polarity;
+    pinMode(Home_Pin,INPUT_PULLUP);
 }
 
 
@@ -93,10 +86,22 @@ void SystemState::update_on_timer()
     timer_flag_ = true;
 }
 
+
+void SystemState::update_homing()
+{
+    if (homing_flag_)
+    {
+        int home_pin_value = digitalRead(Home_Pin);
+        if (home_pin_value == homing_polarity_)
+        {
+            stepper_driver_.run(0);
+            homing_flag_ = false;
+        }
+    }
+}
+
 void SystemState::update_trajectory()
 {
-    static bool dio_state = false;
-
     bool timer_flag_tmp;
 
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
@@ -108,20 +113,6 @@ void SystemState::update_trajectory()
 
     if (timer_flag_tmp)
     {
-        // DEBUG
-        // --------------------------------------------------
-        if (dio_state)
-        {
-            dio_state = false;
-            digitalWrite(2,LOW);
-        }
-        else
-        {
-            dio_state = true;
-            digitalWrite(2,HIGH);
-        }
-        // --------------------------------------------------
-
         if ((trajectory_ptr_ != nullptr))
         {
 
@@ -218,6 +209,12 @@ bool SystemState::is_trajectory_running()
     {
         return false;
     }
+}
+
+
+bool SystemState::is_homing()
+{
+    return homing_flag_;
 }
 
 
@@ -331,6 +328,10 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
     {
         release_command(json_msg, json_rsp);
     }
+    else if (command.equals("home_to_switch"))
+    {
+        home_to_switch_command(json_msg, json_rsp);
+    }
     else if (command.equals("get_step_mode"))
     {
         get_step_mode_command(json_msg, json_rsp);
@@ -394,6 +395,7 @@ void SystemState::hard_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
     {
         trajectory_ptr_ -> set_status(Trajectory::Done);
     }
+    homing_flag_ = false;
     json_rsp["success"] = true;
 }
 
@@ -405,13 +407,14 @@ void SystemState::soft_stop_command(JsonObject &json_msg, JsonObject &json_rsp)
     {
         trajectory_ptr_ -> set_status(Trajectory::Done);
     }
+    homing_flag_ = false;
     json_rsp["success"] = true;
 }
 
 void SystemState::is_busy_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
     
-    bool is_busy = stepper_driver_.is_busy() || is_trajectory_running(); 
+    bool is_busy = stepper_driver_.is_busy() || is_trajectory_running() || is_homing(); 
     json_rsp["success"] = true;
     json_rsp["is_busy"] = is_busy;
 }
@@ -419,6 +422,7 @@ void SystemState::is_busy_command(JsonObject &json_msg, JsonObject &json_rsp)
 
 void SystemState::move_to_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
+    homing_flag_ = false;
     if (json_msg.containsKey("position"))
     {
         float position = json_msg["position"];
@@ -435,6 +439,7 @@ void SystemState::move_to_command(JsonObject &json_msg, JsonObject &json_rsp)
 
 void SystemState::move_to_fullsteps_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
+    homing_flag_ = false;
     if (json_msg.containsKey("position"))
     {
         float position = json_msg["position"];
@@ -451,6 +456,7 @@ void SystemState::move_to_fullsteps_command(JsonObject &json_msg, JsonObject &js
 
 void SystemState::move_to_microsteps_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
+    homing_flag_ = false;
     if (json_msg.containsKey("position"))
     {
         long position = json_msg["position"];
@@ -466,6 +472,7 @@ void SystemState::move_to_microsteps_command(JsonObject &json_msg, JsonObject &j
 
 void SystemState::run_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
+    homing_flag_ = false;
     if (json_msg.containsKey("velocity"))
     {
         float velocity = json_msg["velocity"];
@@ -481,6 +488,7 @@ void SystemState::run_command(JsonObject &json_msg, JsonObject &json_rsp)
 
 void SystemState::run_with_feedback_command(JsonObject &json_msg, JsonObject &json_rsp)
 {
+    homing_flag_ = false;
     if (json_msg.containsKey("velocity"))
     {
         float velocity = json_msg["velocity"];
@@ -490,10 +498,6 @@ void SystemState::run_with_feedback_command(JsonObject &json_msg, JsonObject &js
         json_rsp["position"] = position;
         json_rsp["success"] = true;
 
-        // DEBUG ... remove this
-        // -------------------------------------
-        //json_rsp["velocity"] = velocity;
-        // -------------------------------------
         if (json_msg.containsKey("servo_angle"))
         {
             long servo_angle = json_msg["servo_angle"];
@@ -510,7 +514,7 @@ void SystemState::run_with_feedback_command(JsonObject &json_msg, JsonObject &js
 
 void SystemState::sinusoid_command(JsonObject &json_msg, JsonObject &json_rsp)
 { 
-
+    homing_flag_ = false;
     if (json_msg.containsKey("amplitude"))
     {
         sin_trajectory_.set_amplitude(json_msg["amplitude"]);
@@ -702,6 +706,37 @@ void SystemState::release_command(JsonObject &json_msg, JsonObject &json_rsp)
     json_rsp["success"] = true;
 }
 
+
+void SystemState::home_to_switch_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    float velocity = 0.0;
+    if (json_msg.containsKey("velocity"))
+    {
+        velocity = json_msg["velocity"];
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = String("missing velocity");
+        return;
+    }
+
+    homing_polarity_ = Default_Home_Polarity;
+    if (json_msg.containsKey("polarity")) 
+    {
+        int polarity = json_msg["polarity"];
+        if (polarity > 0) {
+            homing_polarity_ = HIGH;
+        }
+        else
+        {
+            homing_polarity_ = LOW;
+        }
+    }
+    homing_flag_ = true;
+    stepper_driver_.run(velocity);
+    json_rsp["success"] = true;
+}
 
 void SystemState::get_step_mode_command(JsonObject &json_msg, JsonObject &json_rsp)
 {

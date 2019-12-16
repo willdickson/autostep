@@ -9,6 +9,8 @@ const int Stepper_Driver_CS_Pin = 10;
 const int Stepper_Driver_Reset_Pin = 7;
 const int Stepper_Driver_Busy_Pin = 8;
 const int RC_Servo_Pin = 3;
+const int Home_Pin = 2;
+const int Default_Home_Polarity = LOW;
 
 const uint32_t Timer_Period = 1000;
 const float Position_Gain = 50.0;

@@ -13,6 +13,8 @@ extern const int Stepper_Driver_CS_Pin;
 extern const int Stepper_Driver_Reset_Pin;
 extern const int Stepper_Driver_Busy_Pin;
 extern const int RC_Servo_Pin;
+extern const int Home_Pin;
+extern const int Default_Home_Polarity; 
 
 extern const uint32_t Timer_Period;
 extern const float Position_Gain;

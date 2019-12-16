@@ -31,6 +31,7 @@ class SystemState
         void set_timer_callback(void(*func)());
         void process_messages();
 
+        void update_homing();
         void update_trajectory();
         void update_on_timer();
         void update_on_serial_event();
@@ -59,6 +60,10 @@ class SystemState
         SinTrajectory sin_trajectory_;
         void start_trajectory();
         bool is_trajectory_running();
+
+        int homing_polarity_;
+        bool homing_flag_;
+        bool is_homing();
 
         // Message handlers
         void handle_json_message(JsonObject &json_msg, JsonObject &json_rsp);
@@ -95,6 +100,8 @@ class SystemState
 
         void enable_command(JsonObject &json_msg, JsonObject &json_rsp);
         void release_command(JsonObject &json_msg, JsonObject &json_rsp);
+
+        void home_to_switch_command(JsonObject &json_msg, JsonObject &json_rsp);
 
         void get_step_mode_command(JsonObject &json_msg, JsonObject &json_rsp);
         void set_step_mode_command(JsonObject &json_msg, JsonObject &json_rsp);

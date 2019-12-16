@@ -347,6 +347,17 @@ class Autostep(serial.Serial):
         self.send_cmd(cmd_dict)
 
 
+    def home_to_switch(self, velocity, polarity=None):
+        """
+        Move motor until homing switch is activated. Sign of velocity sets direction.
+        """
+        velocity_adj = velocity*self.gear_ratio
+        cmd_dict = {'command': 'home_to_switch', 'velocity': velocity_adj}
+        if polarity is not None:
+            cmd_dict['polarity'] = int(polarity)
+        self.send_cmd(cmd_dict)
+
+
     def soft_stop(self):
         """
         Perform soft stop - motor will stop using deceleration in current mode (jog or max).
