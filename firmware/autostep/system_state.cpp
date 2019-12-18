@@ -29,7 +29,7 @@ void SystemState::initialize()
     velocity_controller_.set_position_gain(Position_Gain);
     velocity_controller_.set_velocity_ffwd(Velocity_FFwd);
 
-    rc_servo_.attach(RC_Servo_Pin,1000,2000);
+    rc_servo_.attach(RC_Servo_Pin,RC_PWM_Width_Min,RC_PWM_Width_Max);
     rc_servo_.write(0);
 
     timer_flag_ = false;
