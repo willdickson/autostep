@@ -10,7 +10,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "bootstrap-vue": "^2.0.0-rc.8",
+    "bootstrap-vue": "^2.0.0-rc.12",
     "lodash": "^4.17.10",
     "socket.io": "^2.1.0",
     "vue": "^2.5.2",
