@@ -44,6 +44,7 @@ class SystemState
         EM3242_AngleSensor angle_sensor_;
         VelocityController velocity_controller_;
         PWMServo rc_servo_;
+        PWMServo rc_servo_alt_;
 
         volatile bool timer_flag_;
         IntervalTimer interval_timer_;
@@ -87,6 +88,9 @@ class SystemState
 
         void get_servo_angle_command(JsonObject &json_msg, JsonObject &json_rsp);
         void set_servo_angle_command(JsonObject &json_msg, JsonObject &json_rsp);
+
+        void get_servo_angle_alt_command(JsonObject &json_msg, JsonObject &json_rsp);
+        void set_servo_angle_alt_command(JsonObject &json_msg, JsonObject &json_rsp);
 
         void get_position_fullsteps_command(JsonObject &json_msg, JsonObject &json_rsp);
         void get_position_microsteps_command(JsonObject &json_msg, JsonObject &json_rsp);
