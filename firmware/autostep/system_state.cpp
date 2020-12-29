@@ -33,7 +33,7 @@ void SystemState::initialize()
     rc_servo_.write(0);
 
     rc_servo_alt_.attach(RC_Servo_Alt_Pin,RC_PWM_Width_Min_Alt,RC_PWM_Width_Max_Alt); 
-    rc_servo_.write(0);
+    rc_servo_alt_.write(0);
 
     timer_flag_ = false;
     trajectory_ptr_ = nullptr;
@@ -661,7 +661,7 @@ void SystemState::set_servo_angle_alt_command(JsonObject &json_msg, JsonObject &
     {
         long servo_angle_alt = json_msg["servo_angle_alt"];
         servo_angle_alt = constrain(servo_angle_alt, 0, 180);
-        rc_servo_.write(uint8_t(servo_angle_alt));
+        rc_servo_alt_.write(uint8_t(servo_angle_alt));
         json_rsp["success"] = true;
     }
     else
