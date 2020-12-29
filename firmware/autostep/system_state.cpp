@@ -32,6 +32,9 @@ void SystemState::initialize()
     rc_servo_.attach(RC_Servo_Pin,RC_PWM_Width_Min,RC_PWM_Width_Max);
     rc_servo_.write(0);
 
+    rc_servo_alt_.attach(RC_Servo_Alt_Pin,RC_PWM_Width_Min_Alt,RC_PWM_Width_Max_Alt); 
+    rc_servo_.write(0);
+
     timer_flag_ = false;
     trajectory_ptr_ = nullptr;
     timer_callback_ = nullptr;
@@ -291,6 +294,14 @@ void SystemState::handle_json_command(JsonObject &json_msg, JsonObject &json_rsp
     else if (command.equals("get_servo_angle"))
     {
         get_servo_angle_command(json_msg, json_rsp);
+    }
+    else if (command.equals("set_servo_angle_alt")) 
+    { 
+        set_servo_angle_alt_command(json_msg, json_rsp);
+    }
+    else if (command.equals("get_servo_angle_alt"))
+    {
+        get_servo_angle_alt_command(json_msg, json_rsp);
     }
     else if (command.equals("get_position_fullsteps"))
     {
@@ -627,6 +638,30 @@ void SystemState::set_servo_angle_command(JsonObject &json_msg, JsonObject &json
         long servo_angle = json_msg["servo_angle"];
         servo_angle = constrain(servo_angle, 0, 180);
         rc_servo_.write(uint8_t(servo_angle));
+        json_rsp["success"] = true;
+    }
+    else
+    {
+        json_rsp["success"] = false;
+        json_rsp["message"] = "missing servo_angle";
+    }
+}
+
+void SystemState::get_servo_angle_alt_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    long servo_angle_alt = long(rc_servo_alt_.read());
+    json_rsp["servo_angle_alt"] = servo_angle_alt;
+    json_rsp["success"] = true;
+}
+
+
+void SystemState::set_servo_angle_alt_command(JsonObject &json_msg, JsonObject &json_rsp)
+{
+    if (json_msg.containsKey("servo_angle_alt"))
+    {
+        long servo_angle_alt = json_msg["servo_angle_alt"];
+        servo_angle_alt = constrain(servo_angle_alt, 0, 180);
+        rc_servo_.write(uint8_t(servo_angle_alt));
         json_rsp["success"] = true;
     }
     else
@@ -1008,9 +1043,3 @@ void SystemState::set_oc_threshold_command(JsonObject &json_msg, JsonObject &jso
         json_rsp["message"] = "missing threshold";
     }
 }
-
-
-
-
-
-

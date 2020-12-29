@@ -6,7 +6,7 @@ port = '/dev/ttyACM0'
 
 stepper = Autostep(port)
 
-servo_angle = stepper.get_servo_angle()
+servo_angle = stepper.get_servo_angle_alt()
 print('servo_angle: {}'.format(servo_angle))
 
 angle_list_fwd = list(range(0,180,1))
@@ -17,7 +17,7 @@ angle_list = angle_list_fwd + angle_list_rev
 while True:
     for i, angle in enumerate(angle_list):
         print('i: {}, angle: {}'.format(i, angle))
-        stepper.set_servo_angle(angle)
+        stepper.set_servo_angle_alt(angle)
         time.sleep(0.01)
 
 
