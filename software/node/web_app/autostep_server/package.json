@@ -14,6 +14,6 @@
     "express": "^4.16.3",
     "json-stringify-pretty-compact": "^1.2.0",
     "lodash": "^4.17.5",
-    "socket.io": "^2.1.0"
+    "socket.io": "^2.5.0"
   }
 }
